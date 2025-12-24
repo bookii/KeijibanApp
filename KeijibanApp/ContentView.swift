@@ -1,18 +1,13 @@
-//
-//  ContentView.swift
-//  KeijibanApp
-//
-//  Created by Tsubasa YABUKI on 2025/12/23.
-//
-
-import SwiftUI
 import SwiftData
+import SwiftUI
 
-struct ContentView: View {
+public struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         NavigationSplitView {
             List {
                 ForEach(items) { item in
@@ -55,7 +50,9 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
-}
+#if DEBUG
+    #Preview {
+        ContentView()
+            .modelContainer(for: Item.self, inMemory: true)
+    }
+#endif

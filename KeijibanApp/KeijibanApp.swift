@@ -1,16 +1,11 @@
-//
-//  KeijibanAppApp.swift
-//  KeijibanApp
-//
-//  Created by Tsubasa YABUKI on 2025/12/23.
-//
-
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
-struct KeijibanAppApp: App {
-    var sharedModelContainer: ModelContainer = {
+public struct KeijibanApp: App {
+    public init() {}
+
+    private var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
         ])
@@ -23,7 +18,7 @@ struct KeijibanAppApp: App {
         }
     }()
 
-    var body: some Scene {
+    public var body: some Scene {
         WindowGroup {
             ContentView()
         }

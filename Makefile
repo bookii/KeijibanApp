@@ -1,0 +1,2 @@
+format:
+	swiftformat . --swift-version 6.2
