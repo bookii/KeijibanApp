@@ -1,0 +1,15 @@
+{
+  "originHash" : "f79d31344a672e11c8befdf58fd135798180e56a426616b23feb46c802ecfed0",
+  "pins" : [
+    {
+      "identity" : "keijibancommonmodule",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bookii/KeijibanCommonModule.git",
+      "state" : {
+        "revision" : "1549a4b473fcd647a7966fb8f024ed1b5080c004",
+        "version" : "0.1.4"
+      }
+    }
+  ],
+  "version" : 3
+}
