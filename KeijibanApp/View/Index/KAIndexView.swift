@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct IndexView: View {
+public struct KAIndexView: View {
     private enum ArrowDirection {
         case left
         case right
@@ -90,6 +90,6 @@ public struct IndexView: View {
 
 #if DEBUG
     #Preview {
-        IndexView()
+        KAIndexView()
     }
 #endif

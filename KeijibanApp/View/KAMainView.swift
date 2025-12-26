@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct MainView: View {
+public struct KAMainView: View {
     public init() {}
 
     public var body: some View {
@@ -17,7 +17,7 @@ public struct MainView: View {
 }
 
 #if DEBUG
-#Preview {
-    MainView()
-}
+    #Preview {
+        KAMainView()
+    }
 #endif
