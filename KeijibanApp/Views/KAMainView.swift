@@ -19,6 +19,6 @@ public struct KAMainView: View {
 #if DEBUG
     #Preview {
         KAMainView()
-            .environment(\.apiService, KAMockApiService())
+            .environment(\.apiService, KAMockApiService.shared)
     }
 #endif

@@ -2,16 +2,14 @@ import SwiftUI
 
 public struct KAKeijibanIndexView: View {
     @Environment(\.apiService) private var apiService
-    @State private var boards = [KABoard]()
+    @State private var boards: [KABoard]?
     @State private var viewHeight: CGFloat?
+
+    public init() {}
 
     public var body: some View {
         ScrollView {
-            if boards.isEmpty {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: viewHeight)
-            } else {
+            if let boards {
                 LazyVStack(spacing: 0) {
                     ForEach(boards) { board in
                         Text(board.name)
@@ -19,6 +17,10 @@ public struct KAKeijibanIndexView: View {
                             .frame(height: viewHeight)
                     }
                 }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: viewHeight)
             }
         }
         .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
@@ -36,6 +38,6 @@ public struct KAKeijibanIndexView: View {
 #if DEBUG
     #Preview {
         KAKeijibanIndexView()
-            .environment(\.apiService, KAMockApiService())
+            .environment(\.apiService, KAMockApiService.shared)
     }
 #endif
