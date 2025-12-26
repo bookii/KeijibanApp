@@ -7,7 +7,7 @@ public struct KeijibanApp: App {
 
     public var body: some Scene {
         WindowGroup {
-            IndexView()
+            MainView()
         }
     }
 }
