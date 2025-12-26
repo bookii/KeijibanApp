@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6D468DB52EFF1E930030B7D5 /* KeijibanCommonModule in Frameworks */ = {isa = PBXBuildFile; productRef = 6D468DB42EFF1E930030B7D5 /* KeijibanCommonModule */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		6D468D192EFAB2260030B7D5 /* KeijibanApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeijibanApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D468D602EFBFCC40030B7D5 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
@@ -24,6 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D468DB52EFF1E930030B7D5 /* KeijibanCommonModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,6 +72,7 @@
 			);
 			name = KeijibanApp;
 			packageProductDependencies = (
+				6D468DB42EFF1E930030B7D5 /* KeijibanCommonModule */,
 			);
 			productName = KeijibanApp;
 			productReference = 6D468D192EFAB2260030B7D5 /* KeijibanApp.app */;
@@ -96,6 +102,9 @@
 			);
 			mainGroup = 6D468D102EFAB2260030B7D5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6D468DB32EFF1E930030B7D5 /* XCRemoteSwiftPackageReference "KeijibanCommonModule" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6D468D1A2EFAB2260030B7D5 /* Products */;
 			projectDirPath = "";
@@ -180,7 +189,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -238,7 +247,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -336,6 +345,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6D468DB32EFF1E930030B7D5 /* XCRemoteSwiftPackageReference "KeijibanCommonModule" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bookii/KeijibanCommonModule.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6D468DB42EFF1E930030B7D5 /* KeijibanCommonModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6D468DB32EFF1E930030B7D5 /* XCRemoteSwiftPackageReference "KeijibanCommonModule" */;
+			productName = KeijibanCommonModule;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6D468D112EFAB2260030B7D5 /* Project object */;
 }

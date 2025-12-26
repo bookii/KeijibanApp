@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct IndexView: View {
+public struct KAIndexView: View {
     private enum ArrowDirection {
         case left
         case right
@@ -36,7 +36,7 @@ public struct IndexView: View {
         ZStack(alignment: .top) {
             Color(uiColor: .systemGray2)
                 .frame(width: 32)
-            VStack(spacing: 24) {
+            VStack(spacing: 16) {
                 Color(uiColor: .systemGray)
                     .overlay(alignment: .leading) {
                         if let boardBodyHeight {
@@ -90,6 +90,6 @@ public struct IndexView: View {
 
 #if DEBUG
     #Preview {
-        IndexView()
+        KAIndexView()
     }
 #endif
