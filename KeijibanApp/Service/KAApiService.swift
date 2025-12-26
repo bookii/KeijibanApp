@@ -8,18 +8,19 @@ public extension EnvironmentValues {
 
 @MainActor
 public protocol KAApiServiceProtocol {
-    func fetchBoards() async -> [KABoard]
+    func fetchBoards() async throws -> [KABoard]
 }
 
 public final class KAApiService: KAApiServiceProtocol {
-    public func fetchBoards() async -> [KABoard] {
+    public func fetchBoards() async throws -> [KABoard] {
         []
     }
 }
 
 public final class KAMockApiService: KAApiServiceProtocol {
-    public func fetchBoards() async -> [KABoard] {
-        [
+    public func fetchBoards() async throws -> [KABoard] {
+        try await Task.sleep(for: .seconds(1))
+        return [
             .init(id: .init(uuidString: "bec571c3-688e-0809-6016-f72b5f616599"), name: "新聞・雑誌部", index: 0),
             .init(id: .init(uuidString: "c31feb82-21ea-6dda-bdc7-7e2f6f01d369"), name: "手書き部", index: 1),
             .init(id: .init(uuidString: "4779bc64-d847-efc5-c03a-b8b137ae5af0"), name: "風景部", index: 2),

@@ -6,10 +6,10 @@ public struct KAMainView: View {
     public var body: some View {
         TabView {
             Tab {
-                IndexView()
+                KAIndexView()
             }
             Tab {
-                EmptyView()
+                KAKeijibanIndexView()
             }
         }
         .tabViewStyle(.page)
@@ -19,5 +19,6 @@ public struct KAMainView: View {
 #if DEBUG
     #Preview {
         KAMainView()
+            .environment(\.apiService, KAMockApiService())
     }
 #endif

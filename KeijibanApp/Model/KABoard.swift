@@ -1,7 +1,7 @@
 import Foundation
 import KeijibanCommonModule
 
-public struct KABoard: Codable {
+public struct KABoard: Codable, Identifiable {
     public let id: UUID?
     public let name: String
     public let index: Int
