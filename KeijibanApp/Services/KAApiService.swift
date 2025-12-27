@@ -1,3 +1,4 @@
+import Alamofire
 import Foundation
 import KeijibanCommonModule
 import SwiftUI
@@ -13,11 +14,28 @@ public protocol KAApiServiceProtocol {
 
 public final class KAApiService: KAApiServiceProtocol {
     public static let shared = KAApiService()
+    private var apiBaseURL: URL {
+        guard let apiBaseURLString = ProcessInfo.processInfo.environment["API_BASE_URL"] else {
+            fatalError("API_BASE_URL is not set")
+        }
+        guard let apiBaseURL = URL(string: apiBaseURLString) else {
+            fatalError("API_BASE_URL is invalidn")
+        }
+        return apiBaseURL
+    }
 
     private init() {}
 
     public func fetchBoards() async throws -> [KABoard] {
-        []
+        let result = await AF.request(apiBaseURL.appendingPathComponent("/boards").absoluteString)
+            .serializingDecodable([KCMBoardDTO].self)
+            .result
+        switch result {
+        case let .success(boards):
+            return try boards.map(KABoard.init(from:))
+        case let .failure(error):
+            throw error
+        }
     }
 }
 

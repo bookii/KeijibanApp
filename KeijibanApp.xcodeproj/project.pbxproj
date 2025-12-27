@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6D468DB52EFF1E930030B7D5 /* KeijibanCommonModule in Frameworks */ = {isa = PBXBuildFile; productRef = 6D468DB42EFF1E930030B7D5 /* KeijibanCommonModule */; };
+		6D468DF82EFF7E360030B7D5 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6D468DF72EFF7E360030B7D5 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D468DB52EFF1E930030B7D5 /* KeijibanCommonModule in Frameworks */,
+				6D468DF82EFF7E360030B7D5 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +75,7 @@
 			name = KeijibanApp;
 			packageProductDependencies = (
 				6D468DB42EFF1E930030B7D5 /* KeijibanCommonModule */,
+				6D468DF72EFF7E360030B7D5 /* Alamofire */,
 			);
 			productName = KeijibanApp;
 			productReference = 6D468D192EFAB2260030B7D5 /* KeijibanApp.app */;
@@ -104,6 +107,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6D468DB32EFF1E930030B7D5 /* XCRemoteSwiftPackageReference "KeijibanCommonModule" */,
+				6D468DF62EFF7E360030B7D5 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6D468D1A2EFAB2260030B7D5 /* Products */;
@@ -355,6 +359,14 @@
 				minimumVersion = 0.1.4;
 			};
 		};
+		6D468DF62EFF7E360030B7D5 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.11.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -362,6 +374,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6D468DB32EFF1E930030B7D5 /* XCRemoteSwiftPackageReference "KeijibanCommonModule" */;
 			productName = KeijibanCommonModule;
+		};
+		6D468DF72EFF7E360030B7D5 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6D468DF62EFF7E360030B7D5 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
