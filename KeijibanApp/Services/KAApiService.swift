@@ -14,17 +14,20 @@ public protocol KAApiServiceProtocol {
 
 public final class KAApiService: KAApiServiceProtocol {
     public static let shared = KAApiService()
-    private var apiBaseURLString: String {
+    private var apiBaseURL: URL {
         guard let apiBaseURLString = ProcessInfo.processInfo.environment["API_BASE_URL"] else {
             fatalError("API_BASE_URL is not set")
         }
-        return apiBaseURLString
+        guard let apiBaseURL = URL(string: apiBaseURLString) else {
+            fatalError("API_BASE_URL is invalidn")
+        }
+        return apiBaseURL
     }
 
     private init() {}
 
     public func fetchBoards() async throws -> [KABoard] {
-        let result = await AF.request(apiBaseURLString + "/boards")
+        let result = await AF.request(apiBaseURL.appendingPathComponent("/boards").absoluteString)
             .serializingDecodable([KCMBoardDTO].self)
             .result
         switch result {
