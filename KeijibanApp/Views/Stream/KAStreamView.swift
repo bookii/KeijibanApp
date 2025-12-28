@@ -15,15 +15,17 @@ private struct ContentView: View {
     private let spacing: CGFloat = 12
     private let startDate = Date()
     private let baseScrollSpeed: CGFloat = 200
+    private let columnCount: Int
     private let itemHeights: [[CGFloat]]
     private let columnHeights: [CGFloat]
-    private let columnCount: Int
+    private let scrollSpeeds: [CGFloat]
 
     fileprivate init(columnCount: Int) {
         self.columnCount = columnCount
 
         var itemHeights: [[CGFloat]] = []
         var columnHeights: [CGFloat] = []
+        var scrollSpeeds: [CGFloat] = []
         for columnIndex in 0 ..< columnCount {
             var itemHeightsInColumn: [CGFloat] = []
             var columnHeight: CGFloat = 0
@@ -34,9 +36,11 @@ private struct ContentView: View {
             }
             itemHeights.append(itemHeightsInColumn)
             columnHeights.append(columnHeight)
+            scrollSpeeds.append(baseScrollSpeed * (0.8 + CGFloat(columnIndex) * 0.1))
         }
         self.itemHeights = itemHeights
         self.columnHeights = columnHeights
+        self.scrollSpeeds = scrollSpeeds
     }
 
     fileprivate var body: some View {
@@ -45,8 +49,7 @@ private struct ContentView: View {
             HStack(alignment: .top, spacing: spacing) {
                 ForEach(0 ..< columnCount, id: \.self) { columnIndex in
                     let columnHeight = columnHeights[columnIndex]
-                    let scrollSpeed = baseScrollSpeed * (0.8 + CGFloat(columnIndex) * 0.1)
-                    let scrollOffset = (elapsedTime * scrollSpeed).truncatingRemainder(dividingBy: columnHeight)
+                    let scrollOffset = (elapsedTime * scrollSpeeds[columnIndex]).truncatingRemainder(dividingBy: columnHeight)
                     VStack(spacing: spacing) {
                         ForEach(0 ..< itemCount * 2, id: \.self) { rowIndex in
                             Color.blue
