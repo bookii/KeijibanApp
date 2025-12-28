@@ -50,7 +50,7 @@ private struct ContentView: View {
                 ForEach(0 ..< columnCount, id: \.self) { columnIndex in
                     let columnHeight = columnHeights[columnIndex]
                     let scrollOffset = (elapsedTime * scrollSpeeds[columnIndex]).truncatingRemainder(dividingBy: columnHeight)
-                    VStack(spacing: spacing) {
+                    LazyVStack(spacing: spacing) {
                         ForEach(0 ..< itemCount * 2, id: \.self) { rowIndex in
                             Color.blue
                                 .frame(height: itemHeights[columnIndex][rowIndex % itemCount])
