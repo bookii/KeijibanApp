@@ -9,5 +9,8 @@ public struct KeijibanApp: App {
         WindowGroup {
             KAMainView()
         }
+        .environment(\.apiService, KAApiService.shared)
+        .environment(\.syncService, KASyncService.shared)
+        .modelContainer(ModelContainer.shared)
     }
 }
