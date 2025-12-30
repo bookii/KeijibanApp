@@ -32,6 +32,8 @@ public struct KAIndexView: View {
 
     @State private var viewHeight: CGFloat?
 
+    public init() {}
+
     public var body: some View {
         ZStack(alignment: .top) {
             Color(uiColor: .systemGray2)

@@ -2,8 +2,10 @@ import SwiftUI
 
 public struct KAKeijibanIndexView: View {
     @Environment(\.apiService) private var apiService
+    @Environment(\.syncService) private var syncService
     @State private var boards: [KABoard]?
     @State private var viewHeight: CGFloat?
+    @State private var error: KALocalizedError?
 
     public init() {}
 
@@ -28,16 +30,45 @@ public struct KAKeijibanIndexView: View {
         }
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
+        .alert(
+            isPresented: Binding(
+                get: { error != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        error = nil
+                    }
+                },
+            ),
+            error: error,
+        ) {
+            Button("OK") {}
+        }
         .task {
-            // TODO: エラー処理
-            boards = await (try? apiService.fetchBoards()) ?? []
+            do {
+                let fetchedBoards = try await apiService.fetchBoards()
+                boards = fetchedBoards
+                try? syncService.syncBoards(fetchedBoards: fetchedBoards)
+            } catch let error as KALocalizedError {
+                self.error = error
+                boards = []
+            } catch {
+                self.error = KALocalizedError.wrapping(error)
+                boards = []
+            }
         }
     }
 }
 
 #if DEBUG
-    #Preview {
+    #Preview("通常") {
         KAKeijibanIndexView()
-            .environment(\.apiService, KAMockApiService.shared)
+            .environment(\.apiService, KAMockApiService())
+            .environment(\.syncService, KAMockSyncService.shared)
+    }
+
+    #Preview("取得エラー") {
+        KAKeijibanIndexView()
+            .environment(\.apiService, KAMockApiService(shouldFail: true))
+            .environment(\.syncService, KAMockSyncService.shared)
     }
 #endif
