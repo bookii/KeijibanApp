@@ -7,14 +7,12 @@ public class KABoard: Identifiable {
     @Attribute(.unique) public private(set) var id: UUID
     public private(set) var name: String
     public private(set) var index: Int
-    public private(set) var syncedAt: Date?
     public private(set) var isDeleted: Bool
 
-    public init(id: UUID, name: String, index: Int, syncedAt: Date? = nil, isDeleted: Bool = false) {
+    public init(id: UUID, name: String, index: Int, isDeleted: Bool = false) {
         self.id = id
         self.name = name
         self.index = index
-        self.syncedAt = syncedAt
         self.isDeleted = isDeleted
     }
 
@@ -25,7 +23,6 @@ public class KABoard: Identifiable {
         self.id = id
         name = kcmBoardDTO.name
         index = kcmBoardDTO.index
-        syncedAt = .now
         isDeleted = false
     }
 
@@ -33,7 +30,6 @@ public class KABoard: Identifiable {
         id = board.id
         name = board.name
         index = board.index
-        syncedAt = .now
         isDeleted = false
     }
 
