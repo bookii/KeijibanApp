@@ -21,8 +21,8 @@ public struct KAStreamView: View {
                     .ignoresSafeArea()
             }
             .padding(.horizontal, 12)
-            .sheet(item: $pickedImage) { _ in
-                EmptyView()
+            .sheet(item: $pickedImage) { pickedImage in
+                KAAnalyzerView(uiImage: pickedImage.uiImage)
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -109,5 +109,6 @@ public struct KAStreamView: View {
 #if DEBUG
     #Preview {
         KAStreamView()
+            .environment(\.analyzerService, KAMockAnalyzerService())
     }
 #endif
