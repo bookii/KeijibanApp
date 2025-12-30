@@ -39,7 +39,7 @@ public struct KAKeijibanIndexView: View {
             do {
                 let fetchedBoards = try await apiService.fetchBoards()
                 boards = fetchedBoards
-                syncService.syncBoards(fetchedBoards: fetchedBoards)
+                try? syncService.syncBoards(fetchedBoards: fetchedBoards)
             } catch {
                 if let localizedError = error as? KALocalizedError {
                     self.error = localizedError

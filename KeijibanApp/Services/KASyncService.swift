@@ -8,7 +8,7 @@ public extension EnvironmentValues {
 
 @MainActor
 public protocol KASyncServiceProtocol {
-    func syncBoards(fetchedBoards: [KABoard])
+    func syncBoards(fetchedBoards: [KABoard]) throws
 }
 
 public final class KASyncService: KASyncServiceProtocol {
@@ -16,12 +16,19 @@ public final class KASyncService: KASyncServiceProtocol {
 
     private init() {}
 
-    public func syncBoards(fetchedBoards: [KABoard]) {
+    public func syncBoards(fetchedBoards: [KABoard]) throws {
         let context = ModelContext(ModelContainer.shared)
 
         for fetchedBoard in fetchedBoards {
-            if let storedBoard = context.model(for: fetchedBoard.id) as? KABoard {
-                storedBoard.update(with: fetchedBoard)
+            let fetchedBoardId = fetchedBoard.id
+            do {
+                if let storedBoard = try context.fetch(FetchDescriptor<KABoard>(predicate: #Predicate { $0.id == fetchedBoardId })).first {
+                    storedBoard.update(with: fetchedBoard)
+                } else {
+                    context.insert(fetchedBoard)
+                }
+            } catch {
+                throw KALocalizedError.withMessage("Failed to sync board: \(fetchedBoard.id)")
             }
         }
     }
