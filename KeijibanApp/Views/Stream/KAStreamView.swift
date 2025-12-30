@@ -21,7 +21,9 @@ public struct KAStreamView: View {
                     .ignoresSafeArea()
             }
             .padding(.horizontal, 12)
-            .sheet(item: $pickedImage) { pickedImage in
+            .sheet(item: $pickedImage) {
+                pickedImage = nil
+            } content: { pickedImage in
                 KAAnalyzerView(uiImage: pickedImage.uiImage)
             }
             .toolbar {
@@ -91,7 +93,7 @@ public struct KAStreamView: View {
                         let scrollOffset = (elapsedTime * scrollSpeeds[columnIndex] + columnHeight).truncatingRemainder(dividingBy: columnHeight)
                         LazyVStack(spacing: spacing) {
                             ForEach(0 ..< itemCount * 2, id: \.self) { rowIndex in
-                                Color.blue
+                                Color(.systemGray)
                                     .frame(height: itemHeights[columnIndex][rowIndex % itemCount])
                                     .overlay {
                                         Text(String(rowIndex))

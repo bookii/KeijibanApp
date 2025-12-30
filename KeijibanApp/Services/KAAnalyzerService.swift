@@ -8,7 +8,7 @@ extension EnvironmentValues {
 }
 
 public protocol KAAnalyzerServiceProtocol {
-    func analyzeImage(_ uiImage: UIImage) async throws -> [KAWordImage]
+    func analyzeImage(_ uiImage: UIImage) async throws -> KAAnalyzeData?
 }
 
 public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
@@ -16,16 +16,21 @@ public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
 
     private init() {}
 
-    public func analyzeImage(_ uiImage: UIImage) async throws -> [KAWordImage] {
-        try await withCheckedThrowingContinuation { continuation in
+    public func analyzeImage(_ originalImage: UIImage) async throws -> KAAnalyzeData? {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<KAAnalyzeData?, Error>) in
+            guard let cgImage = originalImage.cgImage else {
+                continuation.resume(returning: nil)
+                return
+            }
+
             let request = VNRecognizeTextRequest { [weak self] request, _ in
                 guard let self, let observations = request.results as? [VNRecognizedTextObservation] else {
-                    continuation.resume(returning: [])
+                    continuation.resume(returning: nil)
                     return
                 }
 
                 let tokenizer = NLTokenizer(unit: .word)
-                var wordImages: [KAWordImage] = []
+                var wordImages: [KAAnalyzeData.WordImage] = []
                 for observation in observations {
                     guard let candidate = observation.topCandidates(1).first else {
                         continue
@@ -33,39 +38,59 @@ public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
                     let text = candidate.string
                     tokenizer.string = text
                     tokenizer.enumerateTokens(in: text.startIndex ..< text.endIndex) { range, _ in
-                        guard let box = try? candidate.boundingBox(for: range)?.boundingBox,
-                              let letterImage = self.cropImage(uiImage, with: box),
-                              let imageData = letterImage.jpegData(compressionQuality: 0.9)
+                        guard let boundingBox = try? candidate.boundingBox(for: range)?.boundingBox else {
+                            return true
+                        }
+                        let marginRatio: CGFloat = 0.05
+                        let expandedBox = boundingBox.insetBy(dx: -marginRatio * boundingBox.width, dy: -marginRatio * boundingBox.height)
+
+                        let previewRect = boundingBox.translateCoordinateFromVisionToPixel(in: originalImage.size)
+                        let storedRect = expandedBox.translateCoordinateFromVisionToPixel(in: originalImage.size)
+
+                        guard let previewImage = self.cropImage(originalImage, with: previewRect),
+                              let storedImage = self.cropImage(originalImage, with: storedRect)
                         else {
                             return true
                         }
-                        wordImages.append(.init(id: UUID(), text: String(text[range]), imageData: imageData))
+                        wordImages.append(.init(text: String(text[range]), storedImage: storedImage, previewImage: previewImage, originInOriginalImage: previewRect.origin))
                         return true
                     }
                 }
-                continuation.resume(returning: wordImages)
+
+                continuation.resume(returning: .init(originalImage: originalImage, wordImages: wordImages))
+            }
+
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["ja", "en"]
+            request.usesLanguageCorrection = false
+            request.minimumTextHeight = 0.1
+
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                continuation.resume(throwing: error)
             }
         }
     }
 
-    private func cropImage(_ image: UIImage, with boundingBox: CGRect) -> UIImage? {
-        guard let cgImage = image.cgImage else {
-            return nil
-        }
-        let width = CGFloat(cgImage.width)
-        let height = CGFloat(cgImage.height)
-        let marginRatio: CGFloat = 0.05
-        let expandedBox = boundingBox.insetBy(dx: -CGFloat(marginRatio) * boundingBox.width,
-                                              dy: -CGFloat(marginRatio) * boundingBox.height)
-        // VisionのboundingBoxは左下原点・正規化座標
-        let rect = CGRect(x: expandedBox.origin.x * width,
-                          y: (1 - expandedBox.origin.y - expandedBox.height) * height,
-                          width: expandedBox.width * width,
-                          height: expandedBox.height * height)
-        guard let croppedCgImage = cgImage.cropping(to: rect) else {
+    private func cropImage(_ image: UIImage, with rect: CGRect) -> UIImage? {
+        guard let cgImage = image.cgImage,
+              let croppedCgImage = cgImage.cropping(to: rect)
+        else {
             return nil
         }
         return UIImage(cgImage: croppedCgImage, scale: image.scale, orientation: image.imageOrientation)
+    }
+}
+
+private extension CGRect {
+    func translateCoordinateFromVisionToPixel(in imageSize: CGSize) -> Self {
+        // Vision の boundingBox は左下原点・正規化座標
+        .init(x: origin.x * imageSize.width,
+              y: (1 - origin.y - height) * imageSize.height,
+              width: width * imageSize.width,
+              height: height * imageSize.height)
     }
 }
 
@@ -77,12 +102,12 @@ public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
             self.shouldFail = shouldFail
         }
 
-        public func analyzeImage(_: UIImage) async throws -> [KAWordImage] {
+        public func analyzeImage(_: UIImage) async throws -> KAAnalyzeData? {
             try await Task.sleep(for: .seconds(1))
             if shouldFail {
                 throw KALocalizedError.withMessage("Mock Failure")
             }
-            return await KAWordImage.mockWordImages()
+            return await KAAnalyzeData.mockAnalyzePreviewData()
         }
     }
 #endif
