@@ -27,17 +27,11 @@ public final class KASyncService: KASyncServiceProtocol {
             throw KALocalizedError.withMessage("Failed to get stored board")
         }
 
-        let storedBoardIds = Set(storedBoards.map(\.id))
         for fetchedBoard in fetchedBoards {
-            if storedBoardIds.contains(fetchedBoard.id),
-               let storedBoard = context.model(for: fetchedBoard.id) as? KABoard
-            {
+            if let storedBoard = storedBoards.first(where: { $0.id == fetchedBoard.id }) {
                 storedBoard.update(with: fetchedBoard)
             } else {
                 context.insert(fetchedBoard)
-            }
-            if context.hasChanges {
-                try context.save()
             }
         }
 
@@ -46,6 +40,10 @@ public final class KASyncService: KASyncServiceProtocol {
             if !fetchedBoardIds.contains(storedBoard.id) {
                 storedBoard.delete()
             }
+        }
+
+        if context.hasChanges {
+            try context.save()
         }
     }
 }
