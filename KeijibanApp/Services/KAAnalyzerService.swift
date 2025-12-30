@@ -32,7 +32,9 @@ public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
                 let tokenizer = NLTokenizer(unit: .word)
                 var wordImages: [KAAnalyzeData.WordImage] = []
                 for observation in observations {
-                    guard let candidate = observation.topCandidates(1).first else {
+                    // NOTE: VNRecognizeTextRequest の minimumTextHeight が効かないのでここで小さい文字を切り捨てる
+                    guard observation.boundingBox.height >= 0.05 * (originalImage.size.width / originalImage.size.height),
+                          let candidate = observation.topCandidates(1).first else {
                         continue
                     }
                     let text = candidate.string
@@ -63,7 +65,6 @@ public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
             request.recognitionLevel = .accurate
             request.recognitionLanguages = ["ja", "en"]
             request.usesLanguageCorrection = false
-            request.minimumTextHeight = 0.1
 
             let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
             do {
