@@ -19,16 +19,32 @@ public final class KASyncService: KASyncServiceProtocol {
     public func syncBoards(fetchedBoards: [KABoard]) throws {
         let context = ModelContext(ModelContainer.shared)
 
+        let storedBoards: [KABoard]
+
+        do {
+            storedBoards = try context.fetch(FetchDescriptor<KABoard>())
+        } catch {
+            throw KALocalizedError.withMessage("Failed to get stored board")
+        }
+
+        let storedBoardIds = Set(storedBoards.map(\.id))
         for fetchedBoard in fetchedBoards {
-            let fetchedBoardId = fetchedBoard.id
-            do {
-                if let storedBoard = try context.fetch(FetchDescriptor<KABoard>(predicate: #Predicate { $0.id == fetchedBoardId })).first {
-                    storedBoard.update(with: fetchedBoard)
-                } else {
-                    context.insert(fetchedBoard)
-                }
-            } catch {
-                throw KALocalizedError.withMessage("Failed to sync board: \(fetchedBoard.id)")
+            if storedBoardIds.contains(fetchedBoard.id),
+               let storedBoard = context.model(for: fetchedBoard.id) as? KABoard
+            {
+                storedBoard.update(with: fetchedBoard)
+            } else {
+                context.insert(fetchedBoard)
+            }
+            if context.hasChanges {
+                try context.save()
+            }
+        }
+
+        let fetchedBoardIds = Set(fetchedBoards.map(\.id))
+        for storedBoard in storedBoards {
+            if !fetchedBoardIds.contains(storedBoard.id) {
+                storedBoard.delete()
             }
         }
     }

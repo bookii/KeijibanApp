@@ -30,22 +30,29 @@ public struct KAKeijibanIndexView: View {
         }
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
-        .alert(isPresented: .constant(error != nil), error: error) {
-            Button("OK") {
-                error = nil
-            }
+        .alert(
+            isPresented: Binding(
+                get: { error != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        error = nil
+                    }
+                },
+            ),
+            error: error,
+        ) {
+            Button("OK") {}
         }
         .task {
             do {
                 let fetchedBoards = try await apiService.fetchBoards()
                 boards = fetchedBoards
                 try? syncService.syncBoards(fetchedBoards: fetchedBoards)
+            } catch let error as KALocalizedError {
+                self.error = error
+                boards = []
             } catch {
-                if let localizedError = error as? KALocalizedError {
-                    self.error = localizedError
-                } else {
-                    self.error = KALocalizedError.wrapping(error)
-                }
+                self.error = KALocalizedError.wrapping(error)
                 boards = []
             }
         }

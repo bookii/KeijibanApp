@@ -27,7 +27,9 @@ public class KABoard: Identifiable {
     }
 
     public func update(with board: KABoard) {
-        id = board.id
+        guard id == board.id else {
+            return
+        }
         name = board.name
         index = board.index
         isDeleted = false
