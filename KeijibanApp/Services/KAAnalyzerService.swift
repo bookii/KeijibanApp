@@ -23,8 +23,8 @@ public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
                 return
             }
 
-            let request = VNRecognizeTextRequest { [weak self] request, _ in
-                guard let self, let observations = request.results as? [VNRecognizedTextObservation] else {
+            let request = VNRecognizeTextRequest { request, _ in
+                guard let observations = request.results as? [VNRecognizedTextObservation] else {
                     continuation.resume(returning: nil)
                     return
                 }
