@@ -2,7 +2,17 @@ import PhotosUI
 import SwiftUI
 
 public struct KAStreamView: View {
+    private struct IdentifiableImage: Identifiable {
+        let id: UUID = .init()
+        let uiImage: UIImage
+
+        init(_ uiImage: UIImage) {
+            self.uiImage = uiImage
+        }
+    }
+
     @State private var pickerItem: PhotosPickerItem?
+    @State private var pickedImage: IdentifiableImage?
 
     public var body: some View {
         NavigationStack {
@@ -11,10 +21,28 @@ public struct KAStreamView: View {
                     .ignoresSafeArea()
             }
             .padding(.horizontal, 12)
+            .sheet(item: $pickedImage) { _ in
+                EmptyView()
+            }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     PhotosPicker(selection: $pickerItem, matching: .images) {
                         Label("", systemImage: "plus")
+                    }
+                }
+            }
+            .onChange(of: pickerItem) {
+                guard let pickerItem else {
+                    return
+                }
+                pickerItem.loadTransferable(type: Data.self) { result in
+                    Task { @MainActor in
+                        if pickerItem == self.pickerItem,
+                           case let .success(data) = result,
+                           let uiImage = data.flatMap({ UIImage(data: $0) })
+                        {
+                            pickedImage = IdentifiableImage(uiImage)
+                        }
                     }
                 }
             }
