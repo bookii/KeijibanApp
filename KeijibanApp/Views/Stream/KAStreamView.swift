@@ -1,4 +1,5 @@
 import PhotosUI
+import SwiftData
 import SwiftUI
 
 public struct KAStreamView: View {
@@ -61,6 +62,7 @@ private struct ContentView: View {
     private let itemHeights: [[CGFloat]]
     private let columnHeights: [CGFloat]
     private let scrollSpeeds: [CGFloat]
+    @Query private var storedWordImages: [KAStoredWordImage]
 
     fileprivate init(columnCount: Int) {
         self.columnCount = columnCount
