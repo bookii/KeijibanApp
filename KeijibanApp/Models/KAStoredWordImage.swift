@@ -13,6 +13,15 @@ public final class KAStoredWordImage: Identifiable, Sendable {
         self.text = text
         self.imageData = imageData
     }
+
+    public init(from analyzedWordImage: KAAnalyzeData.WordImage) throws {
+        guard let imageData = analyzedWordImage.storedImage.jpegData(compressionQuality: 0.9) else {
+            throw KALocalizedError.withMessage("Failed to convert UIImage to Data.")
+        }
+        id = .init()
+        text = analyzedWordImage.text
+        self.imageData = imageData
+    }
 }
 
 public extension KAStoredWordImage {
