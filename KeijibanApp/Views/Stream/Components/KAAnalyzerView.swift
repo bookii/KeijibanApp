@@ -96,7 +96,7 @@ public struct KAAnalyzerView: View {
                     Text("未選択").tag(KABoard?(nil))
                     ForEach(boards) { board in
                         Text(board.name)
-                            .tag(board)
+                            .tag(Optional(board))
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -106,9 +106,12 @@ public struct KAAnalyzerView: View {
             .background(in: Capsule())
             .backgroundStyle(Color(.systemGray6))
             Button {
+                guard let selectedBoard else {
+                    fatalError("selectedBoard must not be nil")
+                }
                 do {
                     for wordImage in analyzeData.wordImages {
-                        try modelContext.insert(KAStoredWordImage(from: wordImage))
+                        try modelContext.insert(KAStoredWordImage(analyzedWordImage: wordImage, board: selectedBoard))
                     }
                     if modelContext.hasChanges {
                         try modelContext.save()
@@ -163,7 +166,6 @@ public struct KAAnalyzerView: View {
     }
 
     #Preview("通常") {
-        @Previewable @State var isSheetPresented = false
         let mockContainer = try! ModelContainer(for: KABoard.self, configurations: .init(isStoredInMemoryOnly: true))
         for mockBoard in KABoard.mockBoards {
             mockContainer.mainContext.insert(mockBoard)
