@@ -34,7 +34,8 @@ public final class KAAnalyzerService: KAAnalyzerServiceProtocol {
                 for observation in observations {
                     // NOTE: VNRecognizeTextRequest の minimumTextHeight が効かないのでここで小さい文字を切り捨てる
                     guard observation.boundingBox.height >= 0.05 * (originalImage.size.width / originalImage.size.height),
-                          let candidate = observation.topCandidates(1).first else {
+                          let candidate = observation.topCandidates(1).first
+                    else {
                         continue
                     }
                     let text = candidate.string

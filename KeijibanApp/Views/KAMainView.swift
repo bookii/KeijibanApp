@@ -26,6 +26,6 @@ public struct KAMainView: View {
     #Preview {
         KAMainView()
             .environment(\.apiService, KAMockApiService())
-            .environment(\.syncService, KAMockSyncService.shared)
+            .environment(\.syncService, KAMockSyncService())
     }
 #endif

@@ -63,12 +63,12 @@ public struct KAKeijibanIndexView: View {
     #Preview("通常") {
         KAKeijibanIndexView()
             .environment(\.apiService, KAMockApiService())
-            .environment(\.syncService, KAMockSyncService.shared)
+            .environment(\.syncService, KAMockSyncService())
     }
 
     #Preview("取得エラー") {
         KAKeijibanIndexView()
             .environment(\.apiService, KAMockApiService(shouldFail: true))
-            .environment(\.syncService, KAMockSyncService.shared)
+            .environment(\.syncService, KAMockSyncService())
     }
 #endif
