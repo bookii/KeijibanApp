@@ -2,7 +2,7 @@ import PhotosUI
 import SwiftData
 import SwiftUI
 
-public struct KAStreamView: View {
+public struct KAGalleryView: View {
     private struct IdentifiableImage: Identifiable {
         let id: UUID = .init()
         let uiImage: UIImage
@@ -74,7 +74,7 @@ public struct KAStreamView: View {
         }
 
         fileprivate var body: some View {
-            HStack(alignment: .top, spacing: KAStreamView.spacing) {
+            HStack(alignment: .top, spacing: KAGalleryView.spacing) {
                 ForEach(0 ..< columnCount, id: \.self) { columnIndex in
                     ColumnView(wordImages: wordImagesInColumns[columnIndex])
                 }
@@ -95,9 +95,9 @@ public struct KAStreamView: View {
         fileprivate var body: some View {
             TimelineView(.animation) { context in
                 if !wordImages.isEmpty {
-                    let elapsedTime = context.date.timeIntervalSince(KAStreamView.startDate)
+                    let elapsedTime = context.date.timeIntervalSince(KAGalleryView.startDate)
                     ScrollView {
-                        LazyVStack(spacing: KAStreamView.spacing) {
+                        LazyVStack(spacing: KAGalleryView.spacing) {
                             ForEach(0 ..< rowCount, id: \.self) { rowIndex in
                                 let wordImage = wordImages[rowIndex % wordImages.count]
                                 Button {} label: {
@@ -167,7 +167,7 @@ public struct KAStreamView: View {
         @Previewable @State var modelContainer: ModelContainer?
         Group {
             if let modelContainer {
-                KAStreamView()
+                KAGalleryView()
                     .modelContainer(modelContainer)
             } else {
                 Color.clear
