@@ -155,9 +155,6 @@ public struct KAAnalyzerView: View {
                 for wordImage in analyzeData.wordImages {
                     try modelContext.insert(KAStoredWordImage(analyzedWordImage: wordImage, board: selectedBoard))
                 }
-                if modelContext.hasChanges {
-                    try modelContext.save()
-                }
                 isDataSaved = true
             } catch let error as KALocalizedError {
                 self.error = error
