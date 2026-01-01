@@ -1,4 +1,5 @@
 import PhotosUI
+import SwiftData
 import SwiftUI
 
 public struct KAStreamView: View {
@@ -11,13 +12,18 @@ public struct KAStreamView: View {
         }
     }
 
+    private static let spacing: CGFloat = 12
+    private static let startDate = Date()
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickedImage: IdentifiableImage?
+    @Query private var wordImages: [KAStoredWordImage]
+
+    public init() {}
 
     public var body: some View {
         NavigationStack {
             GeometryReader { proxy in
-                ContentView(columnCount: Int(proxy.size.width / 80))
+                ContentView(wordImages: wordImages, columnCount: max(1, Int(proxy.size.width / 100)))
                     .ignoresSafeArea()
             }
             .padding(.horizontal, 12)
@@ -33,6 +39,7 @@ public struct KAStreamView: View {
                     }
                 }
             }
+
             .onChange(of: pickerItem) {
                 guard let pickerItem else {
                     return
@@ -52,55 +59,102 @@ public struct KAStreamView: View {
     }
 
     private struct ContentView: View {
-        private let itemCount: Int = 20
-        private let spacing: CGFloat = 12
-        private let startDate = Date()
-        private let baseScrollSpeed: CGFloat = 200
-        private let columnCount: Int
-        private let itemHeights: [[CGFloat]]
-        private let columnHeights: [CGFloat]
-        private let scrollSpeeds: [CGFloat]
+        private let wordImagesInColumns: [[KAStoredWordImage]]
+        private var columnCount: Int {
+            wordImagesInColumns.count
+        }
 
-        fileprivate init(columnCount: Int) {
-            self.columnCount = columnCount
-
-            var itemHeights: [[CGFloat]] = []
-            var columnHeights: [CGFloat] = []
-            var scrollSpeeds: [CGFloat] = []
-            for columnIndex in 0 ..< columnCount {
-                var itemHeightsInColumn: [CGFloat] = []
-                var columnHeight: CGFloat = 0
-                for rowIndex in 0 ..< itemCount {
-                    let height = CGFloat((columnIndex + rowIndex) % itemCount + 50)
-                    itemHeightsInColumn.append(height)
-                    columnHeight += height + spacing
-                }
-                itemHeights.append(itemHeightsInColumn)
-                columnHeights.append(columnHeight)
-                scrollSpeeds.append(baseScrollSpeed * (0.8 + CGFloat(columnIndex) * 0.1))
+        fileprivate init(wordImages: [KAStoredWordImage], columnCount: Int) {
+            let shuffledStoredWordImages = wordImages.shuffled()
+            var wordImagesInColumns = Array(repeating: [KAStoredWordImage](), count: columnCount)
+            for index in shuffledStoredWordImages.indices {
+                wordImagesInColumns[index % columnCount].append(shuffledStoredWordImages[index])
             }
-            self.itemHeights = itemHeights
-            self.columnHeights = columnHeights
-            self.scrollSpeeds = scrollSpeeds
+            self.wordImagesInColumns = wordImagesInColumns
+        }
+
+        fileprivate var body: some View {
+            HStack(alignment: .top, spacing: KAStreamView.spacing) {
+                ForEach(0 ..< columnCount, id: \.self) { columnIndex in
+                    ColumnView(wordImages: wordImagesInColumns[columnIndex])
+                }
+            }
+        }
+    }
+
+    private struct ColumnView: View {
+        private let wordImages: [KAStoredWordImage]
+        @State private var rowCount: Int
+        @State private var viewWidth: CGFloat?
+
+        fileprivate init(wordImages: [KAStoredWordImage]) {
+            self.wordImages = wordImages
+            _rowCount = .init(initialValue: wordImages.count)
         }
 
         fileprivate var body: some View {
             TimelineView(.animation) { context in
-                let elapsedTime = context.date.timeIntervalSince(startDate)
-                HStack(alignment: .top, spacing: spacing) {
-                    ForEach(0 ..< columnCount, id: \.self) { columnIndex in
-                        let columnHeight = columnHeights[columnIndex]
-                        let scrollOffset = (elapsedTime * scrollSpeeds[columnIndex] + columnHeight).truncatingRemainder(dividingBy: columnHeight)
-                        LazyVStack(spacing: spacing) {
-                            ForEach(0 ..< itemCount * 2, id: \.self) { rowIndex in
-                                Color(.systemGray)
-                                    .frame(height: itemHeights[columnIndex][rowIndex % itemCount])
-                                    .overlay {
-                                        Text(String(rowIndex))
-                                    }
+                if !wordImages.isEmpty {
+                    let elapsedTime = context.date.timeIntervalSince(KAStreamView.startDate)
+                    ScrollView {
+                        LazyVStack(spacing: KAStreamView.spacing) {
+                            ForEach(0 ..< rowCount, id: \.self) { rowIndex in
+                                let wordImage = wordImages[rowIndex % wordImages.count]
+                                Button {} label: {
+                                    LazyImage(data: wordImage.imageData)
+                                        .frame(maxWidth: .infinity, maxHeight: viewWidth.flatMap { $0 * 1.5 }, alignment: .center)
+                                        .onAppear {
+                                            if rowIndex == rowCount - 1 {
+                                                rowCount = rowCount + wordImages.count
+                                            }
+                                        }
+                                        .rotationEffect(.degrees(180))
+                                }
                             }
                         }
-                        .offset(y: scrollOffset - columnHeight)
+                        .offset(y: -elapsedTime * 100)
+                        .background(Color(.systemBackground))
+                    }
+                    .scrollIndicators(.never)
+                    .scrollEdgeEffectStyle(.none, for: .all)
+                    .scrollEdgeEffectHidden(true)
+                    .scrollDisabled(true)
+                }
+            }
+            .rotationEffect(.degrees(180))
+            .onGeometryChange(for: CGFloat.self, of: \.size.width) { width in
+                viewWidth = width
+            }
+        }
+    }
+
+    private struct LazyImage: View {
+        private let data: Data
+        @State private var uiImage: UIImage?
+
+        fileprivate init(data: Data) {
+            self.data = data
+        }
+
+        fileprivate var body: some View {
+            Group {
+                if let uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    Color.clear
+                }
+            }
+            .onAppear {
+                if uiImage == nil {
+                    Task {
+                        let uiImage = await Task.detached(priority: .userInitiated) {
+                            UIImage(data: data)
+                        }.value
+                        await MainActor.run {
+                            self.uiImage = uiImage
+                        }
                     }
                 }
             }
@@ -110,7 +164,28 @@ public struct KAStreamView: View {
 
 #if DEBUG
     #Preview {
-        KAStreamView()
-            .environment(\.analyzerService, KAMockAnalyzerService())
+        @Previewable @State var modelContainer: ModelContainer?
+        Group {
+            if let modelContainer {
+                KAStreamView()
+                    .modelContainer(modelContainer)
+            } else {
+                Color.clear
+                    .task {
+                        do {
+                            let container = try ModelContainer(for: KAStoredWordImage.self, configurations: .init(isStoredInMemoryOnly: true))
+                            let storedWordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
+                                try? KAStoredWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
+                            }
+                            for storedWordImage in storedWordImages {
+                                container.mainContext.insert(storedWordImage)
+                            }
+                            modelContainer = container
+                        } catch {
+                            fatalError("Failed to init modelContainer: \(error.localizedDescription)")
+                        }
+                    }
+            }
+        }
     }
 #endif
