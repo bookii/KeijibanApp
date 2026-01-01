@@ -25,6 +25,7 @@ public struct KAGalleryView: View {
     @State private var selectedWordImages: [KAStoredWordImage] = []
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickedImage: IdentifiableImage?
+    @State private var isSaveCompletionAlertPresented: Bool = false
 
     public init() {}
 
@@ -49,6 +50,9 @@ public struct KAGalleryView: View {
                 if !selectedWordImages.isEmpty {
                     SelectedImagesView(selectedImages: $selectedWordImages)
                         .padding(16)
+                        .environment(\.onSaveSentence) {
+                            isSaveCompletionAlertPresented = true
+                        }
                 }
             }
             .toolbar {
@@ -57,6 +61,9 @@ public struct KAGalleryView: View {
                         Label("", systemImage: "plus")
                     }
                 }
+            }
+            .alert("フレーズを保存しました！", isPresented: $isSaveCompletionAlertPresented) {
+                Button("OK") {}
             }
             .onAppear {
                 shuffledWordImages = Array(allWordImages.shuffled().prefix(Self.displayedWordCount))
@@ -119,10 +126,11 @@ public struct KAGalleryView: View {
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
                     Button {
+                        modelContext.insert(KAPhrase(id: .init(), storedWordImages: selectedImages))
                         selectedImages = []
                         onSaveSentence?()
                     } label: {
-                        Text("言葉を保存する")
+                        Text("フレーズを保存する")
                             .frame(height: 32)
                             .frame(maxWidth: .infinity)
                     }
@@ -248,7 +256,8 @@ public struct KAGalleryView: View {
                 Color.clear
                     .task {
                         do {
-                            let container = try ModelContainer(for: KAStoredWordImage.self, configurations: .init(isStoredInMemoryOnly: true))
+                            let container = try ModelContainer(for: KAStoredWordImage.self, KAPhrase.self,
+                                                               configurations: .init(isStoredInMemoryOnly: true))
                             let storedWordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
                                 try? KAStoredWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
                             }

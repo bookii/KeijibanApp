@@ -8,7 +8,7 @@ public final class KAStoredWordImage: Identifiable, Sendable {
     public private(set) var text: String
     public private(set) var imageData: Data
     public private(set) var board: KABoard
-    @Relationship(inverse: \KASentence.storedWordImages) public private(set) var sentences: [KASentence] = []
+    @Relationship(inverse: \KAPhrase.storedWordImages) public private(set) var phrases: [KAPhrase] = []
 
     public init(id: UUID, text: String, imageData: Data, board: KABoard) {
         self.id = id
