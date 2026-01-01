@@ -8,7 +8,7 @@ public struct KAMainView: View {
     public var body: some View {
         TabView(selection: $selectedTabIndex) {
             Tab(value: 0) {
-                KAStreamView()
+                KAGalleryView()
             }
             Tab(value: 1) {
                 KAIndexView()
