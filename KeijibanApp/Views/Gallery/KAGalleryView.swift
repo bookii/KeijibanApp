@@ -2,6 +2,10 @@ import PhotosUI
 import SwiftData
 import SwiftUI
 
+private extension EnvironmentValues {
+    @Entry var onSelectWordImage: ((KAStoredWordImage) -> Void)?
+}
+
 public struct KAGalleryView: View {
     private struct IdentifiableImage: Identifiable {
         let id: UUID = .init()
@@ -14,23 +18,37 @@ public struct KAGalleryView: View {
 
     private static let spacing: CGFloat = 12
     private static let startDate = Date()
+    private static let displayedWordCount: Int = 100
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickedImage: IdentifiableImage?
-    @Query private var wordImages: [KAStoredWordImage]
+    @Query private var allWordImages: [KAStoredWordImage]
+    @State private var shuffledWordImages: [KAStoredWordImage] = []
+    @State private var selectedWordImages: [KAStoredWordImage] = []
 
     public init() {}
 
     public var body: some View {
         NavigationStack {
             GeometryReader { proxy in
-                ContentView(wordImages: wordImages, columnCount: max(1, Int(proxy.size.width / 100)))
+                ContentView(wordImages: shuffledWordImages,
+                            columnCount: max(1, Int(proxy.size.width / 100)),
+                            selectedWordImages: $selectedWordImages)
                     .ignoresSafeArea()
+                    .environment(\.onSelectWordImage) { wordImage in
+                        selectedWordImages.append(wordImage)
+                    }
             }
             .padding(.horizontal, 12)
             .sheet(item: $pickedImage) {
                 pickedImage = nil
             } content: { pickedImage in
                 KAAnalyzerView(uiImage: pickedImage.uiImage)
+            }
+            .overlay(alignment: .bottom) {
+                if !selectedWordImages.isEmpty {
+                    SelectedImagesView(selectedImages: $selectedWordImages)
+                        .padding(16)
+                }
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -39,7 +57,9 @@ public struct KAGalleryView: View {
                     }
                 }
             }
-
+            .onAppear {
+                shuffledWordImages = Array(allWordImages.shuffled().prefix(Self.displayedWordCount))
+            }
             .onChange(of: pickerItem) {
                 guard let pickerItem else {
                     return
@@ -58,17 +78,41 @@ public struct KAGalleryView: View {
         }
     }
 
+    private struct SelectedImagesView: View {
+        @Binding private var selectedImages: [KAStoredWordImage]
+
+        fileprivate init(selectedImages: Binding<[KAStoredWordImage]>) {
+            _selectedImages = selectedImages
+        }
+
+        fileprivate var body: some View {
+            ScrollView(.horizontal) {
+                HStack(spacing: 4) {
+                    ForEach(selectedImages.enumerated(), id: \.element) { _, selectedImage in
+                        LazyImage(data: selectedImage.imageData)
+                            .frame(height: 48)
+                            .frame(maxWidth: 72)
+                    }
+                }
+            }
+            .scrollIndicators(.never)
+            .defaultScrollAnchor(.trailing, for: .sizeChanges)
+            .padding(16)
+            .background(in: Capsule())
+            .backgroundStyle(Color(.systemGray6))
+        }
+    }
+
     private struct ContentView: View {
         private let wordImagesInColumns: [[KAStoredWordImage]]
         private var columnCount: Int {
             wordImagesInColumns.count
         }
 
-        fileprivate init(wordImages: [KAStoredWordImage], columnCount: Int) {
-            let shuffledStoredWordImages = wordImages.shuffled()
+        fileprivate init(wordImages: [KAStoredWordImage], columnCount: Int, selectedWordImages _: Binding<[KAStoredWordImage]>) {
             var wordImagesInColumns = Array(repeating: [KAStoredWordImage](), count: columnCount)
-            for index in shuffledStoredWordImages.indices {
-                wordImagesInColumns[index % columnCount].append(shuffledStoredWordImages[index])
+            for index in wordImages.indices {
+                wordImagesInColumns[index % columnCount].append(wordImages[index])
             }
             self.wordImagesInColumns = wordImagesInColumns
         }
@@ -84,12 +128,12 @@ public struct KAGalleryView: View {
 
     private struct ColumnView: View {
         private let wordImages: [KAStoredWordImage]
-        @State private var rowCount: Int
+        @Environment(\.onSelectWordImage) private var onSelectWordImage
+        @State private var rowCount = KAGalleryView.displayedWordCount
         @State private var viewWidth: CGFloat?
 
         fileprivate init(wordImages: [KAStoredWordImage]) {
             self.wordImages = wordImages
-            _rowCount = .init(initialValue: wordImages.count)
         }
 
         fileprivate var body: some View {
@@ -100,7 +144,9 @@ public struct KAGalleryView: View {
                         LazyVStack(spacing: KAGalleryView.spacing) {
                             ForEach(0 ..< rowCount, id: \.self) { rowIndex in
                                 let wordImage = wordImages[rowIndex % wordImages.count]
-                                Button {} label: {
+                                Button {
+                                    onSelectWordImage?(wordImage)
+                                } label: {
                                     LazyImage(data: wordImage.imageData)
                                         .frame(maxWidth: .infinity, maxHeight: viewWidth.flatMap { $0 * 1.5 }, alignment: .center)
                                         .onAppear {
