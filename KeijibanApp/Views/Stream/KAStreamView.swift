@@ -1,4 +1,3 @@
-import ImageIO
 import PhotosUI
 import SwiftData
 import SwiftUI
