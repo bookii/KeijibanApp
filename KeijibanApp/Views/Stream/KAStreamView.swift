@@ -64,8 +64,6 @@ public struct KAStreamView: View {
             wordImagesInColumns.count
         }
 
-        @State private var rowCounts: [Int: Int] = [:]
-
         fileprivate init(wordImages: [KAStoredWordImage], columnCount: Int) {
             let shuffledStoredWordImages = wordImages.shuffled()
             var wordImagesInColumns = Array(repeating: [KAStoredWordImage](), count: columnCount)
@@ -73,21 +71,14 @@ public struct KAStreamView: View {
                 wordImagesInColumns[index % columnCount].append(shuffledStoredWordImages[index])
             }
             self.wordImagesInColumns = wordImagesInColumns
-            for columnIndex in wordImagesInColumns.indices {
-                rowCounts[columnIndex] = wordImagesInColumns[columnIndex].count
-            }
         }
 
         fileprivate var body: some View {
-            HStack(alignment: .top, spacing: spacing) {
+            HStack(alignment: .top, spacing: KAStreamView.spacing) {
                 ForEach(0 ..< columnCount, id: \.self) { columnIndex in
                     ColumnView(wordImages: wordImagesInColumns[columnIndex])
                 }
             }
-        }
-
-        private func index(columnIndex: Int, rowIndex: Int) -> Int {
-            columnIndex + rowIndex * columnCount
         }
     }
 
@@ -104,9 +95,9 @@ public struct KAStreamView: View {
         fileprivate var body: some View {
             TimelineView(.animation) { context in
                 if !wordImages.isEmpty {
-                    let elapsedTime = context.date.timeIntervalSince(startDate)
+                    let elapsedTime = context.date.timeIntervalSince(KAStreamView.startDate)
                     ScrollView {
-                        LazyVStack(spacing: spacing) {
+                        LazyVStack(spacing: KAStreamView.spacing) {
                             ForEach(0 ..< rowCount, id: \.self) { rowIndex in
                                 let wordImage = wordImages[rowIndex % wordImages.count]
                                 Button {} label: {
