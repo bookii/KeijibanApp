@@ -4,7 +4,7 @@ import SwiftUI
 
 private extension EnvironmentValues {
     @Entry var onSelectWordImage: ((KAStoredWordImage) -> Void)?
-    @Entry var onSaveSentence: (() -> Void)?
+    @Entry var onSavePhrase: (() -> Void)?
 }
 
 public struct KAGalleryView: View {
@@ -50,7 +50,7 @@ public struct KAGalleryView: View {
                 if !selectedWordImages.isEmpty {
                     SelectedImagesView(selectedImages: $selectedWordImages)
                         .padding(16)
-                        .environment(\.onSaveSentence) {
+                        .environment(\.onSavePhrase) {
                             isSaveCompletionAlertPresented = true
                         }
                 }
@@ -88,7 +88,7 @@ public struct KAGalleryView: View {
 
     private struct SelectedImagesView: View {
         @Environment(\.modelContext) private var modelContext
-        @Environment(\.onSaveSentence) private var onSaveSentence
+        @Environment(\.onSavePhrase) private var onSavePhrase
         @Binding private var selectedImages: [KAStoredWordImage]
 
         fileprivate init(selectedImages: Binding<[KAStoredWordImage]>) {
@@ -99,7 +99,7 @@ public struct KAGalleryView: View {
             VStack(spacing: 8) {
                 ScrollView(.horizontal) {
                     HStack(spacing: 4) {
-                        ForEach(selectedImages.enumerated(), id: \.element) { _, selectedImage in
+                        ForEach(selectedImages) { selectedImage in
                             LazyImage(data: selectedImage.imageData)
                                 .frame(height: 48)
                                 .frame(maxWidth: 72)
@@ -127,8 +127,8 @@ public struct KAGalleryView: View {
                     .buttonBorderShape(.circle)
                     Button {
                         modelContext.insert(KAPhrase(id: .init(), storedWordImages: selectedImages))
+                        onSavePhrase?()
                         selectedImages = []
-                        onSaveSentence?()
                     } label: {
                         Text("フレーズを保存する")
                             .frame(height: 32)

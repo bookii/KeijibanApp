@@ -11,7 +11,7 @@ public final class KAPhrase {
     public init(id: UUID, storedWordImages: [KAStoredWordImage]) {
         self.id = id
         self.storedWordImages = storedWordImages
-        self.text = storedWordImages.map(\.text).joined()
-        self.createdAt = .now
+        text = storedWordImages.map(\.text).joined()
+        createdAt = .now
     }
 }
