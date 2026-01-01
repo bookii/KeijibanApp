@@ -4,6 +4,7 @@ import SwiftUI
 
 private extension EnvironmentValues {
     @Entry var onSelectWordImage: ((KAStoredWordImage) -> Void)?
+    @Entry var onSaveSentence: (() -> Void)?
 }
 
 public struct KAGalleryView: View {
@@ -19,11 +20,11 @@ public struct KAGalleryView: View {
     private static let spacing: CGFloat = 12
     private static let startDate = Date()
     private static let displayedWordCount: Int = 100
-    @State private var pickerItem: PhotosPickerItem?
-    @State private var pickedImage: IdentifiableImage?
     @Query private var allWordImages: [KAStoredWordImage]
     @State private var shuffledWordImages: [KAStoredWordImage] = []
     @State private var selectedWordImages: [KAStoredWordImage] = []
+    @State private var pickerItem: PhotosPickerItem?
+    @State private var pickedImage: IdentifiableImage?
 
     public init() {}
 
@@ -79,6 +80,8 @@ public struct KAGalleryView: View {
     }
 
     private struct SelectedImagesView: View {
+        @Environment(\.modelContext) private var modelContext
+        @Environment(\.onSaveSentence) private var onSaveSentence
         @Binding private var selectedImages: [KAStoredWordImage]
 
         fileprivate init(selectedImages: Binding<[KAStoredWordImage]>) {
@@ -86,20 +89,46 @@ public struct KAGalleryView: View {
         }
 
         fileprivate var body: some View {
-            ScrollView(.horizontal) {
-                HStack(spacing: 4) {
-                    ForEach(selectedImages.enumerated(), id: \.element) { _, selectedImage in
-                        LazyImage(data: selectedImage.imageData)
-                            .frame(height: 48)
-                            .frame(maxWidth: 72)
+            VStack(spacing: 8) {
+                ScrollView(.horizontal) {
+                    HStack(spacing: 4) {
+                        ForEach(selectedImages.enumerated(), id: \.element) { _, selectedImage in
+                            LazyImage(data: selectedImage.imageData)
+                                .frame(height: 48)
+                                .frame(maxWidth: 72)
+                        }
                     }
                 }
+                .scrollIndicators(.never)
+                .defaultScrollAnchor(.trailing, for: .sizeChanges)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 8)
+                .background {
+                    Color(.systemGray6)
+                        .clipShape(.capsule)
+                        .glassEffect()
+                }
+                .background(in: Capsule())
+                HStack(spacing: 6) {
+                    Button {
+                        selectedImages = []
+                    } label: {
+                        Image(systemName: "xmark")
+                            .frame(width: 32, height: 32)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
+                    Button {
+                        selectedImages = []
+                        onSaveSentence?()
+                    } label: {
+                        Text("言葉を保存する")
+                            .frame(height: 32)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.glassProminent)
+                }
             }
-            .scrollIndicators(.never)
-            .defaultScrollAnchor(.trailing, for: .sizeChanges)
-            .padding(16)
-            .background(in: Capsule())
-            .backgroundStyle(Color(.systemGray6))
         }
     }
 
