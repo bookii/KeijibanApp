@@ -21,10 +21,11 @@ public struct KAGalleryView: View {
     private static let startDate = Date()
     private static let displayedWordCount: Int = 100
     @Query private var allWordImages: [KAStoredWordImage]
-    @State private var shuffledWordImages: [KAStoredWordImage] = []
-    @State private var selectedWordImages: [KAStoredWordImage] = []
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickedImage: IdentifiableImage?
+    @State private var isPhraseListViewPresented: Bool = false
+    @State private var shuffledWordImages: [KAStoredWordImage] = []
+    @State private var selectedWordImages: [KAStoredWordImage] = []
     @State private var isSaveCompletionAlertPresented: Bool = false
 
     public init() {}
@@ -46,6 +47,9 @@ public struct KAGalleryView: View {
             } content: { pickedImage in
                 KAAnalyzerView(uiImage: pickedImage.uiImage)
             }
+            .sheet(isPresented: $isPhraseListViewPresented) {
+                KAPhraseListView()
+            }
             .overlay(alignment: .bottom) {
                 if !selectedWordImages.isEmpty {
                     SelectedImagesView(selectedImages: $selectedWordImages)
@@ -57,7 +61,9 @@ public struct KAGalleryView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("", systemImage: "book.pages") {}
+                    Button("", systemImage: "book.pages") {
+                        isPhraseListViewPresented = true
+                    }
                 }
                 ToolbarSpacer(.fixed, placement: .topBarTrailing)
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -101,25 +107,15 @@ public struct KAGalleryView: View {
 
         fileprivate var body: some View {
             VStack(spacing: 8) {
-                ScrollView(.horizontal) {
-                    HStack(spacing: 4) {
-                        ForEach(selectedImages) { selectedImage in
-                            LazyImage(data: selectedImage.imageData)
-                                .frame(height: 48)
-                                .frame(maxWidth: 72)
-                        }
+                KAPhrasedWordImagesView(wordImages: selectedImages)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
+                    .background {
+                        Color(.systemGray6)
+                            .clipShape(.capsule)
+                            .glassEffect()
                     }
-                }
-                .scrollIndicators(.never)
-                .defaultScrollAnchor(.trailing, for: .sizeChanges)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 8)
-                .background {
-                    Color(.systemGray6)
-                        .clipShape(.capsule)
-                        .glassEffect()
-                }
-                .background(in: Capsule())
+                    .background(in: Capsule())
                 HStack(spacing: 6) {
                     Button {
                         selectedImages = []
@@ -188,7 +184,7 @@ public struct KAGalleryView: View {
                                 Button {
                                     onSelectWordImage?(wordImage)
                                 } label: {
-                                    LazyImage(data: wordImage.imageData)
+                                    KALazyImageView(data: wordImage.imageData)
                                         .frame(maxWidth: .infinity, maxHeight: viewWidth.flatMap { $0 * 1.5 }, alignment: .center)
                                         .onAppear {
                                             if rowIndex == rowCount - 1 {
@@ -214,66 +210,32 @@ public struct KAGalleryView: View {
             }
         }
     }
-
-    private struct LazyImage: View {
-        private let data: Data
-        @State private var uiImage: UIImage?
-
-        fileprivate init(data: Data) {
-            self.data = data
-        }
-
-        fileprivate var body: some View {
-            Group {
-                if let uiImage {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                } else {
-                    Color.clear
-                }
-            }
-            .onAppear {
-                if uiImage == nil {
-                    Task {
-                        let uiImage = await Task.detached(priority: .userInitiated) {
-                            UIImage(data: data)
-                        }.value
-                        await MainActor.run {
-                            self.uiImage = uiImage
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 #if DEBUG
     #Preview {
         @Previewable @State var modelContainer: ModelContainer?
-        Group {
-            if let modelContainer {
-                KAGalleryView()
-                    .modelContainer(modelContainer)
-            } else {
-                Color.clear
-                    .task {
-                        do {
-                            let container = try ModelContainer(for: KAStoredWordImage.self, KAPhrase.self,
-                                                               configurations: .init(isStoredInMemoryOnly: true))
-                            let storedWordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
-                                try? KAStoredWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
-                            }
-                            for storedWordImage in storedWordImages {
-                                container.mainContext.insert(storedWordImage)
-                            }
-                            modelContainer = container
-                        } catch {
-                            fatalError("Failed to init modelContainer: \(error.localizedDescription)")
-                        }
+        if let modelContainer {
+            KAGalleryView()
+                .modelContainer(modelContainer)
+        } else {
+            Color.clear
+                .task {
+                    let container: ModelContainer
+                    do {
+                        container = try ModelContainer(for: KAStoredWordImage.self, KAPhrase.self,
+                                                       configurations: .init(isStoredInMemoryOnly: true))
+                    } catch {
+                        fatalError("Failed to init modelContainer: \(error.localizedDescription)")
                     }
-            }
+                    let storedWordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
+                        try? KAStoredWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
+                    }
+                    for storedWordImage in storedWordImages {
+                        container.mainContext.insert(storedWordImage)
+                    }
+                    modelContainer = container
+                }
         }
     }
 #endif

@@ -8,10 +8,18 @@ public final class KAPhrase {
     public private(set) var text: String
     public private(set) var createdAt: Date
 
-    public init(id: UUID, storedWordImages: [KAStoredWordImage]) {
+    public init(id: UUID, storedWordImages: [KAStoredWordImage], createdAt: Date = .now) {
         self.id = id
         self.storedWordImages = storedWordImages
         text = storedWordImages.map(\.text).joined()
-        createdAt = .now
+        self.createdAt = createdAt
     }
+}
+
+public extension KAPhrase {
+    #if DEBUG
+        static func mockPhrase() async -> KAPhrase {
+            await .init(id: .init(), storedWordImages: KAStoredWordImage.mockWordImages())
+        }
+    #endif
 }
