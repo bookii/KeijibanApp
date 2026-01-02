@@ -13,7 +13,7 @@ public struct KAPostView: View {
 
     public var body: some View {
         NavigationStack {
-            Text("")
+            VStack(spacing: 16) {}
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button("", systemImage: "xmark") {

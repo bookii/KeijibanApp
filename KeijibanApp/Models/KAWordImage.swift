@@ -3,7 +3,7 @@ import SwiftData
 import UIKit
 
 @Model
-public final class KAWordImage: Identifiable, Sendable {
+public final class KAWordImage: Identifiable {
     @Attribute(.unique) public private(set) var id: UUID
     public private(set) var text: String
     public private(set) var imageData: Data
