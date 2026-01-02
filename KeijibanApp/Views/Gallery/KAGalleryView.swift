@@ -3,7 +3,7 @@ import SwiftData
 import SwiftUI
 
 private extension EnvironmentValues {
-    @Entry var onSelectWordImage: ((KAStoredWordImage) -> Void)?
+    @Entry var onSelectWordImage: ((KAWordImage) -> Void)?
     @Entry var onSavePhrase: (() -> Void)?
 }
 
@@ -20,12 +20,12 @@ public struct KAGalleryView: View {
     private static let spacing: CGFloat = 12
     private static let startDate = Date()
     private static let displayedWordCount: Int = 100
-    @Query private var allWordImages: [KAStoredWordImage]
+    @Query private var allWordImages: [KAWordImage]
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickedImage: IdentifiableImage?
     @State private var isPhraseListViewPresented: Bool = false
-    @State private var shuffledWordImages: [KAStoredWordImage] = []
-    @State private var selectedWordImages: [KAStoredWordImage] = []
+    @State private var shuffledWordImages: [KAWordImage] = []
+    @State private var selectedWordImages: [KAWordImage] = []
     @State private var isSaveCompletionAlertPresented: Bool = false
 
     public init() {}
@@ -98,9 +98,9 @@ public struct KAGalleryView: View {
     private struct SelectedImagesView: View {
         @Environment(\.modelContext) private var modelContext
         @Environment(\.onSavePhrase) private var onSavePhrase
-        @Binding private var selectedImages: [KAStoredWordImage]
+        @Binding private var selectedImages: [KAWordImage]
 
-        fileprivate init(selectedImages: Binding<[KAStoredWordImage]>) {
+        fileprivate init(selectedImages: Binding<[KAWordImage]>) {
             _selectedImages = selectedImages
         }
 
@@ -125,7 +125,7 @@ public struct KAGalleryView: View {
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
                     Button {
-                        modelContext.insert(KAPhrase(id: .init(), storedWordImages: selectedImages))
+                        modelContext.insert(KAPhrase(wordImages: selectedImages))
                         onSavePhrase?()
                         selectedImages = []
                     } label: {
@@ -140,13 +140,13 @@ public struct KAGalleryView: View {
     }
 
     private struct ContentView: View {
-        private let wordImagesInColumns: [[KAStoredWordImage]]
+        private let wordImagesInColumns: [[KAWordImage]]
         private var columnCount: Int {
             wordImagesInColumns.count
         }
 
-        fileprivate init(wordImages: [KAStoredWordImage], columnCount: Int, selectedWordImages _: Binding<[KAStoredWordImage]>) {
-            var wordImagesInColumns = Array(repeating: [KAStoredWordImage](), count: columnCount)
+        fileprivate init(wordImages: [KAWordImage], columnCount: Int, selectedWordImages _: Binding<[KAWordImage]>) {
+            var wordImagesInColumns = Array(repeating: [KAWordImage](), count: columnCount)
             for index in wordImages.indices {
                 wordImagesInColumns[index % columnCount].append(wordImages[index])
             }
@@ -163,12 +163,12 @@ public struct KAGalleryView: View {
     }
 
     private struct ColumnView: View {
-        private let wordImages: [KAStoredWordImage]
+        private let wordImages: [KAWordImage]
         @Environment(\.onSelectWordImage) private var onSelectWordImage
         @State private var rowCount = KAGalleryView.displayedWordCount
         @State private var viewWidth: CGFloat?
 
-        fileprivate init(wordImages: [KAStoredWordImage]) {
+        fileprivate init(wordImages: [KAWordImage]) {
             self.wordImages = wordImages
         }
 
@@ -222,16 +222,16 @@ public struct KAGalleryView: View {
                 .task {
                     let container: ModelContainer
                     do {
-                        container = try ModelContainer(for: KAStoredWordImage.self, KAPhrase.self,
+                        container = try ModelContainer(for: KAWordImage.self, KAPhrase.self,
                                                        configurations: .init(isStoredInMemoryOnly: true))
                     } catch {
                         fatalError("Failed to init modelContainer: \(error.localizedDescription)")
                     }
-                    let storedWordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
-                        try? KAStoredWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
+                    let wordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
+                        try? KAWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
                     }
-                    for storedWordImage in storedWordImages {
-                        container.mainContext.insert(storedWordImage)
+                    for wordImage in wordImages {
+                        container.mainContext.insert(wordImage)
                     }
                     modelContainer = container
                 }

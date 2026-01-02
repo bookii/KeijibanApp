@@ -41,7 +41,7 @@ public struct KALazyImageView: View {
         } else {
             Color.clear
                 .task {
-                    mockImageData = await KAStoredWordImage.mockWordImages().first!.imageData
+                    mockImageData = await KAWordImage.mockWordImages().first!.imageData
                 }
         }
     }

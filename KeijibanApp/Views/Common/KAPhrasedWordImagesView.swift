@@ -1,19 +1,21 @@
 import SwiftUI
 
 public struct KAPhrasedWordImagesView: View {
-    private let wordImages: [KAStoredWordImage]
+    private let wordImages: [KAWordImage]
 
-    public init(wordImages: [KAStoredWordImage]) {
+    public init(wordImages: [KAWordImage]) {
         self.wordImages = wordImages
     }
 
     public var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 4) {
-                ForEach(wordImages) { wordImage in
+                // 同じ wordImage が複数含まれている場合があるので、offset を ID にする
+                ForEach(wordImages.enumerated(), id: \.offset) { index, wordImage in
                     KALazyImageView(data: wordImage.imageData)
                         .frame(height: 48)
                         .frame(maxWidth: 72)
+                        .id(index)
                 }
             }
         }
@@ -25,13 +27,13 @@ public struct KAPhrasedWordImagesView: View {
 
 #if DEBUG
     #Preview {
-        @Previewable @State var mockWordImages: [KAStoredWordImage]?
+        @Previewable @State var mockWordImages: [KAWordImage]?
         if let mockWordImages {
             KAPhrasedWordImagesView(wordImages: mockWordImages)
         } else {
             Color.clear
                 .task {
-                    mockWordImages = await KAPhrase.mockPhrase().storedWordImages
+                    mockWordImages = await KAPhrase.mockPhrase().wordImages
                 }
         }
     }

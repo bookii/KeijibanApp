@@ -17,7 +17,7 @@ public struct KAPhraseListView: View {
                 ForEach(phrasesByDate, id: \.0) { date, phrases in
                     Section(date.formatted(date: .numeric, time: .omitted)) {
                         ForEach(phrases) { phrase in
-                            KAPhrasedWordImagesView(wordImages: phrase.storedWordImages)
+                            KAPhrasedWordImagesView(wordImages: phrase.wordImages)
                         }
                     }
                 }
@@ -46,7 +46,7 @@ public struct KAPhraseListView: View {
                     }
                     let mockPhrase = await KAPhrase.mockPhrase()
                     for date in dates {
-                        container.mainContext.insert(KAPhrase(id: .init(), storedWordImages: mockPhrase.storedWordImages, createdAt: date))
+                        container.mainContext.insert(KAPhrase(wordImages: mockPhrase.wordImages, createdAt: date))
                     }
                     modelContainer = container
                 }
