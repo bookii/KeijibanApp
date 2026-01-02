@@ -12,7 +12,7 @@ public final class KAPhrase {
     public var wordImages: [KAWordImage] {
         wordImageRelations
             .sorted { $0.order < $1.order }
-            .compactMap(\.wordImage)
+            .map(\.wordImage)
     }
 
     public init(id: UUID = .init(), wordImages: [KAWordImage], createdAt: Date = .now) {
