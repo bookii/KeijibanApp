@@ -16,7 +16,6 @@ public struct KAPhrasedWordImagesView: View {
                         .frame(height: 48)
                         .frame(maxWidth: 72)
                 }
-                }
             }
         }
         .scrollIndicators(.never)
