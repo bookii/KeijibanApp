@@ -60,12 +60,11 @@ public struct KAGalleryView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("", systemImage: "book.pages") {
                         isPhraseListViewPresented = true
                     }
                 }
-                ToolbarSpacer(.fixed, placement: .topBarTrailing)
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     PhotosPicker(selection: $pickerItem, matching: .images) {
                         Label("", systemImage: "plus")

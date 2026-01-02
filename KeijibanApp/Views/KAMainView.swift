@@ -17,7 +17,7 @@ public struct KAMainView: View {
                 KAKeijibanIndexView()
             }
         }
-        .tabViewStyle(.page)
+        .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea()
     }
 }
