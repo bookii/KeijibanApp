@@ -5,43 +5,56 @@ public struct KAKeijibanIndexView: View {
     @Environment(\.syncService) private var syncService
     @State private var boards: [KABoard]?
     @State private var viewHeight: CGFloat?
+    @State private var isPostSheetPresented: Bool = false
     @State private var error: Error?
 
     public init() {}
 
     public var body: some View {
-        ScrollView {
-            if let boards {
-                LazyVStack(spacing: 0) {
-                    ForEach(boards) { board in
-                        Text(board.name)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: viewHeight)
+        NavigationStack {
+            ScrollView {
+                if let boards {
+                    LazyVStack(spacing: 0) {
+                        ForEach(boards) { board in
+                            Text(board.name)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: viewHeight)
+                        }
+                    }
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: viewHeight)
+                }
+            }
+            .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
+                viewHeight = height
+            }
+            .scrollTargetBehavior(.paging)
+            .scrollIndicators(.hidden)
+            .errorAlert($error)
+            .fullScreenCover(isPresented: $isPostSheetPresented) {
+                EmptyView()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("", systemImage: "square.and.pencil") {
+                        isPostSheetPresented = true
                     }
                 }
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: viewHeight)
             }
-        }
-        .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
-            viewHeight = height
-        }
-        .scrollTargetBehavior(.paging)
-        .scrollIndicators(.hidden)
-        .errorAlert($error)
-        .task {
-            do {
-                let fetchedBoards = try await apiService.fetchBoards()
-                boards = fetchedBoards
-                try? syncService.syncBoards(fetchedBoards: fetchedBoards)
-            } catch let error as KALocalizedError {
-                self.error = error
-                boards = []
-            } catch {
-                self.error = KALocalizedError.wrapping(error)
-                boards = []
+            .task {
+                do {
+                    let fetchedBoards = try await apiService.fetchBoards()
+                    boards = fetchedBoards
+                    try? syncService.syncBoards(fetchedBoards: fetchedBoards)
+                } catch let error as KALocalizedError {
+                    self.error = error
+                    boards = []
+                } catch {
+                    self.error = KALocalizedError.wrapping(error)
+                    boards = []
+                }
             }
         }
     }
