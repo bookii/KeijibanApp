@@ -40,7 +40,7 @@ public struct KAPhraseListView: View {
                 .task {
                     let container: ModelContainer
                     do {
-                        container = try ModelContainer(for: KAPhrase.self, configurations: .init(isStoredInMemoryOnly: true))
+                        container = try ModelContainer(for: KAPhrase.self, KAPhraseWordImage.self, configurations: .init(isStoredInMemoryOnly: true))
                     } catch {
                         fatalError("Failed to init modelContainer: \(error.localizedDescription)")
                     }
