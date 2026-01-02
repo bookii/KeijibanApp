@@ -176,7 +176,6 @@ public struct KAEditorView: View {
                     }
                 } label: {
                     Image(systemName: "delete.left")
-                        .offset(x: -1)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
