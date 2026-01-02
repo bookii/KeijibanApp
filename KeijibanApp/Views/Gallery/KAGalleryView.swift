@@ -222,7 +222,7 @@ public struct KAGalleryView: View {
                 .task {
                     let container: ModelContainer
                     do {
-                        container = try ModelContainer(for: KAWordImage.self, KAPhrase.self,
+                        container = try ModelContainer(for: KAWordImage.self, KAPhrase.self, KAPhraseWordImage.self,
                                                        configurations: .init(isStoredInMemoryOnly: true))
                     } catch {
                         fatalError("Failed to init modelContainer: \(error.localizedDescription)")
