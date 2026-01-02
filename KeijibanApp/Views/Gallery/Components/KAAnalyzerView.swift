@@ -153,7 +153,7 @@ public struct KAAnalyzerView: View {
             }
             do {
                 for wordImage in analyzeData.wordImages {
-                    try modelContext.insert(KAStoredWordImage(analyzedWordImage: wordImage, board: selectedBoard))
+                    try modelContext.insert(KAWordImage(analyzedWordImage: wordImage, board: selectedBoard))
                 }
                 isDataSaved = true
             } catch let error as KALocalizedError {
@@ -193,15 +193,13 @@ public struct KAAnalyzerView: View {
         fileprivate var body: some View {
             Color.clear
                 .sheet(isPresented: $isSheetPresented) {
-                    Group {
-                        if let uiImage {
-                            KAAnalyzerView(uiImage: uiImage)
-                        } else {
-                            Color.clear
-                        }
-                    }
-                    .task {
-                        uiImage = await UIImage.mockImage()
+                    if let uiImage {
+                        KAAnalyzerView(uiImage: uiImage)
+                    } else {
+                        Color.clear
+                            .task {
+                                uiImage = await UIImage.mockImage()
+                            }
                     }
                 }
                 .environment(\.analyzerService, KAMockAnalyzerService(shouldFail: shouldFail))

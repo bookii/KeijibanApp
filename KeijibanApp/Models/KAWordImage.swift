@@ -3,12 +3,12 @@ import SwiftData
 import UIKit
 
 @Model
-public final class KAStoredWordImage: Identifiable, Sendable {
+public final class KAWordImage: Identifiable, Sendable {
     @Attribute(.unique) public private(set) var id: UUID
     public private(set) var text: String
     public private(set) var imageData: Data
     public private(set) var board: KABoard
-    @Relationship(inverse: \KAPhrase.storedWordImages) public private(set) var phrases: [KAPhrase] = []
+    @Relationship(deleteRule: .cascade) public private(set) var phraseRelations: [KAPhraseWordImage] = []
 
     public init(id: UUID, text: String, imageData: Data, board: KABoard) {
         self.id = id
@@ -28,11 +28,11 @@ public final class KAStoredWordImage: Identifiable, Sendable {
     }
 }
 
-public extension KAStoredWordImage {
+public extension KAWordImage {
     #if DEBUG
-        private nonisolated(unsafe) static var _mockWordImages: [KAStoredWordImage]?
+        private nonisolated(unsafe) static var _mockWordImages: [KAWordImage]?
 
-        static func mockWordImages() async -> [KAStoredWordImage] {
+        static func mockWordImages() async -> [KAWordImage] {
             await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap {
                 guard let imageData = $0.storedImage.jpegData(compressionQuality: 0.9) else {
                     return nil
