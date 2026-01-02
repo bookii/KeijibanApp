@@ -16,9 +16,6 @@ public extension ModelContainer {
             do {
                 let container = try ModelContainer(for: KABoard.self, KAWordImage.self, KAPhrase.self, KAPhraseWordImage.self,
                                                    configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-                for board in KABoard.mockBoards {
-                    container.mainContext.insert(board)
-                }
                 let wordImages = await KAWordImage.mockWordImages()
                 for wordImage in wordImages {
                     container.mainContext.insert(wordImage)

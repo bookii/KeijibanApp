@@ -34,7 +34,6 @@ public struct KAErrorAlertModifier: ViewModifier {
                 error: localizedError,
             ) {
                 Button("OK") {
-                    dismiss()
                     onDismiss?()
                 }
             }
