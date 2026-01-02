@@ -15,7 +15,7 @@ public struct KAPhrasedWordImagesView: View {
                     KALazyImageView(data: wordImage.imageData)
                         .frame(height: 48)
                         .frame(maxWidth: 72)
-                        .id(index)
+                }
                 }
             }
         }
