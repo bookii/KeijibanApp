@@ -16,7 +16,7 @@ public struct KAPhraseListView: View {
             List {
                 ForEach(phrasesByDate, id: \.0) { date, phrases in
                     Section(date.formatted(date: .numeric, time: .omitted)) {
-                        ForEach(phrases) { phrase in
+                        ForEach(phrases.sorted { $0.createdAt > $1.createdAt }) { phrase in
                             KAPhrasedWordImagesView(wordImages: phrase.wordImages)
                         }
                     }
