@@ -5,7 +5,7 @@ public struct KAKeijibanIndexView: View {
     @Environment(\.syncService) private var syncService
     @State private var boards: [KABoard]?
     @State private var viewHeight: CGFloat?
-    @State private var error: KALocalizedError?
+    @State private var error: Error?
 
     public init() {}
 
@@ -30,19 +30,7 @@ public struct KAKeijibanIndexView: View {
         }
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
-        .alert(
-            isPresented: Binding(
-                get: { error != nil },
-                set: { isPresented in
-                    if !isPresented {
-                        error = nil
-                    }
-                },
-            ),
-            error: error,
-        ) {
-            Button("OK") {}
-        }
+        .errorAlert($error)
         .task {
             do {
                 let fetchedBoards = try await apiService.fetchBoards()

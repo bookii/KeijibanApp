@@ -1,7 +1,13 @@
+import SwiftData
 import SwiftUI
 
 public struct KAMainView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.apiService) private var apiService
+    @Environment(\.syncService) private var syncService
+    @Query private var boards: [KABoard]
     @State private var selectedTabIndex: Int = 1
+    @State private var error: Error?
 
     public init() {}
 
@@ -19,6 +25,23 @@ public struct KAMainView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea()
+        .errorAlert($error)
+        .task {
+            if boards.isEmpty {
+                do {
+                    let fetchedBoards = try await apiService.fetchBoards()
+                    try syncService.syncBoards(fetchedBoards: fetchedBoards)
+                    for board in boards {
+                        modelContext.insert(board)
+                    }
+                    if modelContext.hasChanges {
+                        try modelContext.save()
+                    }
+                } catch {
+                    self.error = KALocalizedError.wrapping(error)
+                }
+            }
+        }
     }
 }
 

@@ -20,7 +20,10 @@ public struct KAGalleryView: View {
     private static let spacing: CGFloat = 12
     private static let startDate = Date()
     private static let displayedWordCount: Int = 100
+    private static let filterAllId = UUID()
     @Query private var allWordImages: [KAWordImage]
+    @Query private var boards: [KABoard]
+    @State private var selectedFilterId: UUID = filterAllId
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickedImage: IdentifiableImage?
     @State private var isPhraseListViewPresented: Bool = false
@@ -66,6 +69,21 @@ public struct KAGalleryView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu("", systemImage: "line.3.horizontal.decrease") {
+                        Section {
+                            Button("", systemImage: "shuffle") {}
+                        }
+                        Section("フィルタ") {
+                            Picker("", selection: $selectedFilterId) {
+                                Text("すべて")
+                                    .tag(Self.filterAllId)
+                                ForEach(boards) { board in
+                                    Text(board.name)
+                                        .tag(board.id.uuidString)
+                                }
+                            }
+                        }
+                    }
                     PhotosPicker(selection: $pickerItem, matching: .images) {
                         Label("", systemImage: "plus")
                     }
@@ -213,27 +231,14 @@ public struct KAGalleryView: View {
 
 #if DEBUG
     #Preview {
-        @Previewable @State var modelContainer: ModelContainer?
-        if let modelContainer {
+        @Previewable @State var mockContainer: ModelContainer?
+        if let mockContainer {
             KAGalleryView()
-                .modelContainer(modelContainer)
+                .modelContainer(mockContainer)
         } else {
             Color.clear
                 .task {
-                    let container: ModelContainer
-                    do {
-                        container = try ModelContainer(for: KAWordImage.self, KAPhrase.self, KAPhraseWordImage.self,
-                                                       configurations: .init(isStoredInMemoryOnly: true))
-                    } catch {
-                        fatalError("Failed to init modelContainer: \(error.localizedDescription)")
-                    }
-                    let wordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
-                        try? KAWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
-                    }
-                    for wordImage in wordImages {
-                        container.mainContext.insert(wordImage)
-                    }
-                    modelContainer = container
+                    mockContainer = await ModelContainer.mockContainer()
                 }
         }
     }
