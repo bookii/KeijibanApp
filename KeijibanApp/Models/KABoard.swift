@@ -8,6 +8,7 @@ public class KABoard: Identifiable {
     public private(set) var name: String
     public private(set) var index: Int
     public private(set) var isDeleted: Bool
+    @Relationship(deleteRule: .cascade, inverse: \KAWordImage.board) public private(set) var wordImages: [KAWordImage] = []
 
     public init(id: UUID, name: String, index: Int, isDeleted: Bool = false) {
         self.id = id
@@ -42,14 +43,12 @@ public class KABoard: Identifiable {
 
 #if DEBUG
     public extension KABoard {
-        static var mockBoards: [KABoard] {
-            [
-                .init(id: .init(uuidString: "bec571c3-688e-0809-6016-f72b5f616599")!, name: "新聞・雑誌部", index: 0),
-                .init(id: .init(uuidString: "c31feb82-21ea-6dda-bdc7-7e2f6f01d369")!, name: "手書き部", index: 1),
-                .init(id: .init(uuidString: "4779bc64-d847-efc5-c03a-b8b137ae5af0")!, name: "風景部", index: 2),
-                .init(id: .init(uuidString: "19e6655c-d191-54a6-c4af-6395cbcf4b1e")!, name: "作字部", index: 3),
-                .init(id: .init(uuidString: "e1205869-830b-a243-d96f-3cb141286458")!, name: "フリースタイル部", index: 4),
-            ]
-        }
+        static let mockBoards: [KABoard] = [
+            .init(id: .init(uuidString: "bec571c3-688e-0809-6016-f72b5f616599")!, name: "新聞・雑誌部", index: 0),
+            .init(id: .init(uuidString: "c31feb82-21ea-6dda-bdc7-7e2f6f01d369")!, name: "手書き部", index: 1),
+            .init(id: .init(uuidString: "4779bc64-d847-efc5-c03a-b8b137ae5af0")!, name: "風景部", index: 2),
+            .init(id: .init(uuidString: "19e6655c-d191-54a6-c4af-6395cbcf4b1e")!, name: "作字部", index: 3),
+            .init(id: .init(uuidString: "e1205869-830b-a243-d96f-3cb141286458")!, name: "フリースタイル部", index: 4),
+        ]
     }
 #endif

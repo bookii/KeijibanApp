@@ -13,7 +13,7 @@ public struct KAAnalyzerView: View {
     @State private var zoomRatio: CGFloat?
     @State private var selectedBoard: KABoard?
     @State private var isDataSaved: Bool = false
-    @State private var error: KALocalizedError?
+    @State private var error: Error?
 
     public init(uiImage: UIImage) {
         self.uiImage = uiImage
@@ -27,21 +27,7 @@ public struct KAAnalyzerView: View {
                 ProgressView()
             }
         }
-        .alert(
-            isPresented: Binding(
-                get: { error != nil },
-                set: { isPresented in
-                    if !isPresented {
-                        error = nil
-                    }
-                },
-            ),
-            error: error,
-        ) {
-            Button("OK") {
-                dismiss()
-            }
-        }
+        .errorAlert($error)
         .alert("見つけた文字を保存しました！", isPresented: $isDataSaved) {
             Button("OK") {
                 dismiss()
@@ -69,24 +55,6 @@ public struct KAAnalyzerView: View {
                 .disabled(selectedBoard == nil)
         }
         .padding(16)
-        .task {
-            if boards.isEmpty {
-                do {
-                    let fetchedBoards = try await apiService.fetchBoards()
-                    try syncService.syncBoards(fetchedBoards: fetchedBoards)
-                    for board in boards {
-                        modelContext.insert(board)
-                    }
-                    if modelContext.hasChanges {
-                        try modelContext.save()
-                    }
-                } catch let error as KALocalizedError {
-                    self.error = error
-                } catch {
-                    self.error = KALocalizedError.wrapping(error)
-                }
-            }
-        }
     }
 
     private func imagesView(analyzeData: KAAnalyzeData) -> some View {

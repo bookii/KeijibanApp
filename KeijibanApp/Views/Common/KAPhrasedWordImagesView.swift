@@ -11,7 +11,7 @@ public struct KAPhrasedWordImagesView: View {
         ScrollView(.horizontal) {
             HStack(spacing: 4) {
                 // 同じ wordImage が複数含まれている場合があるので、offset を ID にする
-                ForEach(wordImages.enumerated(), id: \.offset) { index, wordImage in
+                ForEach(wordImages.enumerated(), id: \.offset) { _, wordImage in
                     KALazyImageView(data: wordImage.imageData)
                         .frame(height: 48)
                         .frame(maxWidth: 72)

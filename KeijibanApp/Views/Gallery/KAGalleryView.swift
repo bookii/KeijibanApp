@@ -17,23 +17,31 @@ public struct KAGalleryView: View {
         }
     }
 
+    private enum Filter: Hashable {
+        case all
+        case board(UUID)
+    }
+
     private static let spacing: CGFloat = 12
     private static let startDate = Date()
     private static let displayedWordCount: Int = 100
-    @Query private var allWordImages: [KAWordImage]
+    @Environment(\.modelContext) private var modelContext
+    @Query private var boards: [KABoard]
+    @State private var selectedFilter: Filter = .all
+    @State private var filteredWordImages: [KAWordImage] = []
+    @State private var selectedWordImages: [KAWordImage] = []
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickedImage: IdentifiableImage?
     @State private var isPhraseListViewPresented: Bool = false
-    @State private var shuffledWordImages: [KAWordImage] = []
-    @State private var selectedWordImages: [KAWordImage] = []
     @State private var isSaveCompletionAlertPresented: Bool = false
+    @State private var error: Error?
 
     public init() {}
 
     public var body: some View {
         NavigationStack {
             GeometryReader { proxy in
-                ContentView(wordImages: shuffledWordImages,
+                ContentView(wordImages: filteredWordImages,
                             columnCount: max(1, Int(proxy.size.width / 100)),
                             selectedWordImages: $selectedWordImages)
                     .ignoresSafeArea()
@@ -42,6 +50,7 @@ public struct KAGalleryView: View {
                     }
             }
             .padding(.horizontal, 12)
+            .errorAlert($error)
             .sheet(item: $pickedImage) {
                 pickedImage = nil
             } content: { pickedImage in
@@ -66,6 +75,16 @@ public struct KAGalleryView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu("", systemImage: "line.3.horizontal.decrease") {
+                        Picker("", selection: $selectedFilter) {
+                            Text("すべて")
+                                .tag(Filter.all)
+                            ForEach(boards) { board in
+                                Text(board.name)
+                                    .tag(Filter.board(board.id))
+                            }
+                        }
+                    }
                     PhotosPicker(selection: $pickerItem, matching: .images) {
                         Label("", systemImage: "plus")
                     }
@@ -74,8 +93,8 @@ public struct KAGalleryView: View {
             .alert("フレーズを保存しました！", isPresented: $isSaveCompletionAlertPresented) {
                 Button("OK") {}
             }
-            .onAppear {
-                shuffledWordImages = Array(allWordImages.shuffled().prefix(Self.displayedWordCount))
+            .task(id: selectedFilter) {
+                await fetchWordImages()
             }
             .onChange(of: pickerItem) {
                 guard let pickerItem else {
@@ -185,6 +204,7 @@ public struct KAGalleryView: View {
                                 } label: {
                                     KALazyImageView(data: wordImage.imageData)
                                         .frame(maxWidth: .infinity, maxHeight: viewWidth.flatMap { $0 * 1.5 }, alignment: .center)
+                                        .id(wordImage.id)
                                         .onAppear {
                                             if rowIndex == rowCount - 1 {
                                                 rowCount = rowCount + wordImages.count
@@ -209,31 +229,36 @@ public struct KAGalleryView: View {
             }
         }
     }
+
+    private func fetchWordImages() async {
+        let predicate: Predicate<KAWordImage>
+        switch selectedFilter {
+        case .all:
+            predicate = #Predicate { _ in true }
+        case let .board(id):
+            predicate = #Predicate { $0.board.id == id }
+        }
+        var descriptor = FetchDescriptor<KAWordImage>(predicate: predicate)
+        descriptor.fetchLimit = Self.displayedWordCount
+        do {
+            filteredWordImages = try modelContext.fetch(descriptor)
+        } catch {
+            self.error = error
+            filteredWordImages = []
+        }
+    }
 }
 
 #if DEBUG
     #Preview {
-        @Previewable @State var modelContainer: ModelContainer?
-        if let modelContainer {
+        @Previewable @State var mockContainer: ModelContainer?
+        if let mockContainer {
             KAGalleryView()
-                .modelContainer(modelContainer)
+                .modelContainer(mockContainer)
         } else {
             Color.clear
                 .task {
-                    let container: ModelContainer
-                    do {
-                        container = try ModelContainer(for: KAWordImage.self, KAPhrase.self, KAPhraseWordImage.self,
-                                                       configurations: .init(isStoredInMemoryOnly: true))
-                    } catch {
-                        fatalError("Failed to init modelContainer: \(error.localizedDescription)")
-                    }
-                    let wordImages = await KAAnalyzeData.mockAnalyzePreviewData().wordImages.compactMap { wordImage in
-                        try? KAWordImage(analyzedWordImage: wordImage, board: .mockBoards.first!)
-                    }
-                    for wordImage in wordImages {
-                        container.mainContext.insert(wordImage)
-                    }
-                    modelContainer = container
+                    mockContainer = await ModelContainer.mockContainer()
                 }
         }
     }

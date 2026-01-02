@@ -30,25 +30,14 @@ public struct KAPhraseListView: View {
 
 #if DEBUG
     #Preview {
-        @Previewable @State var modelContainer: ModelContainer?
-        let dates: [Date] = [.now, .now, .init(timeIntervalSinceNow: -60 * 60 * 24)]
-        if let modelContainer {
+        @Previewable @State var mockContainer: ModelContainer?
+        if let mockContainer {
             KAPhraseListView()
-                .modelContainer(modelContainer)
+                .modelContainer(mockContainer)
         } else {
             Color.clear
                 .task {
-                    let container: ModelContainer
-                    do {
-                        container = try ModelContainer(for: KAPhrase.self, KAPhraseWordImage.self, configurations: .init(isStoredInMemoryOnly: true))
-                    } catch {
-                        fatalError("Failed to init modelContainer: \(error.localizedDescription)")
-                    }
-                    let mockPhrase = await KAPhrase.mockPhrase()
-                    for date in dates {
-                        container.mainContext.insert(KAPhrase(wordImages: mockPhrase.wordImages, createdAt: date))
-                    }
-                    modelContainer = container
+                    mockContainer = await ModelContainer.mockContainer()
                 }
         }
     }
