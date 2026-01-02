@@ -4,9 +4,13 @@ public struct KAKeijibanIndexView: View {
     @Environment(\.apiService) private var apiService
     @Environment(\.syncService) private var syncService
     @State private var boards: [KABoard]?
+    @State private var selectedBoardId: UUID?
     @State private var viewHeight: CGFloat?
-    @State private var isPostSheetPresented: Bool = false
+    @State private var isEditorSheetPresented: Bool = false
     @State private var error: Error?
+    private var selectedBoard: KABoard? {
+        boards?.first(where: { $0.id == selectedBoardId })
+    }
 
     public init() {}
 
@@ -19,8 +23,10 @@ public struct KAKeijibanIndexView: View {
                             Text(board.name)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: viewHeight)
+                                .id(board.id)
                         }
                     }
+                    .scrollTargetLayout()
                 } else {
                     ProgressView()
                         .frame(maxWidth: .infinity)
@@ -31,22 +37,27 @@ public struct KAKeijibanIndexView: View {
                 viewHeight = height
             }
             .scrollTargetBehavior(.paging)
+            .scrollPosition(id: $selectedBoardId)
             .scrollIndicators(.hidden)
             .errorAlert($error)
-            .fullScreenCover(isPresented: $isPostSheetPresented) {
-                EmptyView()
+            .fullScreenCover(isPresented: $isEditorSheetPresented) {
+                if let selectedBoard {
+                    KAEditorView(board: selectedBoard, isPresented: $isEditorSheetPresented)
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("", systemImage: "square.and.pencil") {
-                        isPostSheetPresented = true
+                        isEditorSheetPresented = true
                     }
+                    .disabled(selectedBoardId == nil)
                 }
             }
             .task {
                 do {
                     let fetchedBoards = try await apiService.fetchBoards()
                     boards = fetchedBoards
+                    selectedBoardId = fetchedBoards.first?.id
                     try? syncService.syncBoards(fetchedBoards: fetchedBoards)
                 } catch let error as KALocalizedError {
                     self.error = error
