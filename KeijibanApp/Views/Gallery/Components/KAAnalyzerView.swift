@@ -27,7 +27,9 @@ public struct KAAnalyzerView: View {
                 ProgressView()
             }
         }
-        .errorAlert($error)
+        .errorAlert($error) {
+            dismiss()
+        }
         .alert("見つけた文字を保存しました！", isPresented: $isDataSaved) {
             Button("OK") {
                 dismiss()
