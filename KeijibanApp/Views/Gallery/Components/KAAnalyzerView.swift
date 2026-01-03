@@ -30,7 +30,7 @@ public struct KAAnalyzerView: View {
         .errorAlert($error) {
             dismiss()
         }
-        .alert("見つけた文字を保存しました！", isPresented: $isDataSaved) {
+        .alert("ワードを記録しました！", isPresented: $isDataSaved) {
             Button("OK") {
                 dismiss()
             }
@@ -47,14 +47,17 @@ public struct KAAnalyzerView: View {
     }
 
     private func resultView(analyzeData: KAAnalyzeData) -> some View {
-        VStack(spacing: 12) {
-            Text("文字を見つけました！")
-                .font(.title.bold())
+        let isWordFound = !analyzeData.wordImages.isEmpty
+        return VStack(spacing: 12) {
+            Text(isWordFound ? "ワードを見つけました！" : "ワードが見つかりませんでした……")
+                .font(.system(size: 24, weight: .bold))
             imagesView(analyzeData: analyzeData)
-            pickerView
-            saveButton(analyzeData: analyzeData)
-                .buttonStyle(.glassProminent)
-                .disabled(selectedBoard == nil)
+            if isWordFound {
+                pickerView
+                saveButton(analyzeData: analyzeData)
+                    .buttonStyle(.glassProminent)
+                    .disabled(selectedBoard == nil)
+            }
         }
         .padding(16)
     }
@@ -132,7 +135,7 @@ public struct KAAnalyzerView: View {
                 self.error = KALocalizedError.wrapping(error)
             }
         } label: {
-            Text("見つけた文字を保存する")
+            Text("見つけたワードを記録する")
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
                 .foregroundStyle(Color.white)

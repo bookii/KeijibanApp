@@ -25,6 +25,7 @@ public struct KAGalleryView: View {
     private static let spacing: CGFloat = 12
     private static let startDate = Date()
     private static let displayedWordCount: Int = 100
+    private static let selectedWordImagesLimit: Int = 10
     @Environment(\.modelContext) private var modelContext
     @Query private var boards: [KABoard]
     @State private var selectedFilter: Filter = .all
@@ -35,6 +36,9 @@ public struct KAGalleryView: View {
     @State private var isPhraseListViewPresented: Bool = false
     @State private var isSaveCompletionAlertPresented: Bool = false
     @State private var error: Error?
+    private var isSelectedWordImagesFull: Bool {
+        selectedWordImages.count >= KAGalleryView.selectedWordImagesLimit
+    }
 
     public init() {}
 
@@ -46,7 +50,9 @@ public struct KAGalleryView: View {
                             selectedWordImages: $selectedWordImages)
                     .ignoresSafeArea()
                     .environment(\.onSelectWordImage) { wordImage in
-                        selectedWordImages.append(wordImage)
+                        if !isSelectedWordImagesFull {
+                            selectedWordImages.append(wordImage)
+                        }
                     }
             }
             .padding(.horizontal, 12)
@@ -61,7 +67,7 @@ public struct KAGalleryView: View {
             }
             .overlay(alignment: .bottom) {
                 if !selectedWordImages.isEmpty {
-                    SelectedImagesView(selectedImages: $selectedWordImages)
+                    SelectedImagesView(selectedWordImages: $selectedWordImages)
                         .padding(16)
                         .environment(\.onSavePhrase) {
                             isSaveCompletionAlertPresented = true
@@ -117,26 +123,31 @@ public struct KAGalleryView: View {
     private struct SelectedImagesView: View {
         @Environment(\.modelContext) private var modelContext
         @Environment(\.onSavePhrase) private var onSavePhrase
-        @Binding private var selectedImages: [KAWordImage]
+        @Binding private var selectedWordImages: [KAWordImage]
 
-        fileprivate init(selectedImages: Binding<[KAWordImage]>) {
-            _selectedImages = selectedImages
+        fileprivate init(selectedWordImages: Binding<[KAWordImage]>) {
+            _selectedWordImages = selectedWordImages
         }
 
         fileprivate var body: some View {
             VStack(spacing: 8) {
-                KAPhrasedWordImagesView(wordImages: selectedImages)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 8)
-                    .background {
-                        Color(.systemGray6)
-                            .clipShape(.capsule)
-                            .glassEffect()
-                    }
-                    .background(in: Capsule())
+                HStack(spacing: 8) {
+                    KAPhrasedWordImagesView(wordImages: selectedWordImages)
+                    Text("\(selectedWordImages.count)/\(KAGalleryView.selectedWordImagesLimit)")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color(.secondaryLabel))
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 8)
+                .background {
+                    Color(.systemGray6)
+                        .clipShape(.capsule)
+                        .glassEffect()
+                }
+                .background(in: Capsule())
                 HStack(spacing: 6) {
                     Button {
-                        selectedImages = []
+                        selectedWordImages = []
                     } label: {
                         Image(systemName: "xmark")
                             .frame(width: 32, height: 32)
@@ -144,11 +155,11 @@ public struct KAGalleryView: View {
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
                     Button {
-                        modelContext.insert(KAPhrase(wordImages: selectedImages))
+                        modelContext.insert(KAPhrase(wordImages: selectedWordImages))
                         onSavePhrase?()
-                        selectedImages = []
+                        selectedWordImages = []
                     } label: {
-                        Text("フレーズを保存する")
+                        Text("フレーズを作成する")
                             .frame(height: 32)
                             .frame(maxWidth: .infinity)
                     }

@@ -8,7 +8,7 @@ public struct KAEditorView: View {
     }
 
     private let board: KABoard
-    private let maxWordImagesCount: Int = 20
+    private let wordImagesLimit: Int = 20
     @Environment(\.modelContext) private var modelContext
     @Binding private var isViewPresented: Bool
     @State private var wordImages: [KAWordImage]?
@@ -20,8 +20,8 @@ public struct KAEditorView: View {
     @State private var selectedListType: ListType = .phrase
     @State private var viewHeight: CGFloat?
     @State private var error: Error?
-    private var isSelectedWordImageExceeding: Bool {
-        selectedWordImages.count > maxWordImagesCount
+    private var isSelectedWordImagesOver: Bool {
+        selectedWordImages.count > wordImagesLimit
     }
 
     public init(board: KABoard, isPresented: Binding<Bool>) {
@@ -44,7 +44,7 @@ public struct KAEditorView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(selectedWordImages.isEmpty || isSelectedWordImageExceeding)
+                    .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver)
                     Spacer().frame(height: 12)
                     Button {
                         isViewPresented = false
@@ -117,9 +117,9 @@ public struct KAEditorView: View {
             .scrollEdgeEffectStyle(.none, for: .all)
             .defaultScrollAnchor(.bottom, for: .sizeChanges)
             .background(in: RoundedRectangle(cornerRadius: 16))
-            Text("\(selectedWordImages.count)/\(maxWordImagesCount)")
+            Text("\(selectedWordImages.count)/\(wordImagesLimit)")
                 .font(.system(size: 14))
-                .foregroundStyle(Color(isSelectedWordImageExceeding ? .systemRed : .secondaryLabel))
+                .foregroundStyle(Color(isSelectedWordImagesOver ? .systemRed : .secondaryLabel))
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.trailing, 4)
         }
