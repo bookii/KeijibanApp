@@ -9,7 +9,7 @@ public extension EnvironmentValues {
 
 @MainActor
 public protocol KAApiServiceProtocol {
-    func fetchBoards() async throws -> [KABoard]
+    func fetchBoards(withEntries: Bool) async throws -> [KABoard]
     func postEntry(boardId: UUID, wordImages: [KAWordImage], authorName: String, deleteKey: String) async throws
 }
 
@@ -27,8 +27,9 @@ public final class KAApiService: KAApiServiceProtocol {
 
     private init() {}
 
-    public func fetchBoards() async throws -> [KABoard] {
-        try await AF.request(apiBaseURL.appendingPathComponent("/boards").absoluteString)
+    public func fetchBoards(withEntries: Bool) async throws -> [KABoard] {
+        let url = apiBaseURL.appendingPathComponent("/boards")
+        return try await AF.request(url.absoluteString, parameters: KCMGetBoardsRequestQuery(withEntries: withEntries))
             .serializingDecodable([KCMBoardDTO].self)
             .value
             .map(KABoard.init(from:))
@@ -43,13 +44,16 @@ public final class KAApiService: KAApiServiceProtocol {
         }
         let base64EncodedStrings = wordImages.map { $0.imageData.base64EncodedString() }
         let url = apiBaseURL.appendingPathComponent("/boards/\(boardId)/entries")
-        _ = try await AF.request(url.absoluteString, method: .post, parameters: [
-            "word_images": base64EncodedStrings,
-            "author_name": authorName,
-            "delete_key": deleteKey,
-        ])
-        .serializingDecodable(EmptyResponse.self)
-        .value
+        let requestBody = KCMPostEntriesRequestBody(
+            wordImages: wordImages.enumerated().map { index, wordImage in
+                .init(base64EncodedImage: wordImage.imageData.base64EncodedString(), index: index)
+            },
+            authorName: authorName,
+            deleteKey: deleteKey,
+        )
+        _ = try await AF.request(url.absoluteString, method: .post, parameters: requestBody)
+            .serializingDecodable(EmptyResponse.self)
+            .value
     }
 }
 
@@ -63,7 +67,7 @@ private nonisolated struct EmptyResponse: Decodable, Sendable {}
             self.shouldFail = shouldFail
         }
 
-        public func fetchBoards() async throws -> [KABoard] {
+        public func fetchBoards(withEntries _: Bool) async throws -> [KABoard] {
             try await Task.sleep(for: .seconds(1))
             if shouldFail {
                 throw KALocalizedError.withMessage("Mock Failure")
