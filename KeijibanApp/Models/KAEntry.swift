@@ -1,7 +1,7 @@
 import Foundation
 import KeijibanCommonModule
 
-public class KAEntry: Identifiable {
+public struct KAEntry: Identifiable {
     public struct WordImage: Identifiable {
         public let id: UUID
         public let imageData: Data
