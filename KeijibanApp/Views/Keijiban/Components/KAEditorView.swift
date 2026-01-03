@@ -74,11 +74,13 @@ public struct KAEditorView: View {
             .onAppear {
                 fetchPhrasesIfNeeded()
                 fetchWordImagesIfNeeded()
-                Task {
-                    do {
-                        try await Task.sleep(for: .seconds(1))
-                        isSheetPresented = true
-                    }
+            }
+            .task {
+                do {
+                    try await Task.sleep(for: .seconds(1))
+                    isSheetPresented = true
+                } catch {
+                    self.error = error
                 }
             }
         }
@@ -91,16 +93,20 @@ public struct KAEditorView: View {
         VStack(spacing: 4) {
             ScrollView {
                 KAFlowLayout(alignment: .leading, spacing: 4) {
-                    ForEach(selectedWordImages[0 ..< wordImagesCountBeforeCursor]) { wordImage in
-                        KALazyImageView(data: wordImage.imageData)
-                            .frame(height: 48)
-                            .frame(maxWidth: 72)
+                    if wordImagesCountBeforeCursor > 0 {
+                        ForEach(selectedWordImages[0 ..< wordImagesCountBeforeCursor]) { wordImage in
+                            KALazyImageView(data: wordImage.imageData)
+                                .frame(height: 48)
+                                .frame(maxWidth: 72)
+                        }
                     }
                     cursorView
-                    ForEach(selectedWordImages[wordImagesCountBeforeCursor ..< selectedWordImages.endIndex]) { wordImage in
-                        KALazyImageView(data: wordImage.imageData)
-                            .frame(height: 48)
-                            .frame(maxWidth: 72)
+                    if wordImagesCountBeforeCursor < selectedWordImages.endIndex {
+                        ForEach(selectedWordImages[wordImagesCountBeforeCursor ..< selectedWordImages.endIndex]) { wordImage in
+                            KALazyImageView(data: wordImage.imageData)
+                                .frame(height: 48)
+                                .frame(maxWidth: 72)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
