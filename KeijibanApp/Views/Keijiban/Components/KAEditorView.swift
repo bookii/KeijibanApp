@@ -7,9 +7,18 @@ public struct KAEditorView: View {
         case wordImage
     }
 
+    private enum TextFieldType {
+        case authorName
+        case deleteKey
+    }
+
     private let board: KABoard
     private let wordImagesLimit: Int = 20
+    private let deleteKeyMaxLength: Int = 4
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.apiService) private var apiService
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var focusedTextField: TextFieldType?
     @Binding private var isViewPresented: Bool
     @State private var wordImages: [KAWordImage]?
     @State private var phrases: [KAPhrase]?
@@ -18,6 +27,9 @@ public struct KAEditorView: View {
     @State private var isCursorDisplayed: Bool = true
     @State private var isSheetPresented: Bool = false
     @State private var selectedListType: ListType = .phrase
+    @State private var authorName: String = ""
+    @State private var deleteKey: String = ""
+    @State private var isCompletionAlertPresented: Bool = false
     @State private var viewHeight: CGFloat?
     @State private var error: Error?
     private var isSelectedWordImagesOver: Bool {
@@ -35,29 +47,10 @@ public struct KAEditorView: View {
                 selectedWordImagesView
                     .onTapGesture {
                         isSheetPresented = true
+                        focusedTextField = nil
                     }
-                VStack(spacing: 0) {
-                    Spacer().frame(height: 16)
-                    Button {} label: {
-                        Text("掲示する")
-                            .padding(.vertical, 4)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver)
-                    Spacer().frame(height: 12)
-                    Button {
-                        isViewPresented = false
-                    } label: {
-                        Text("キャンセル")
-                            .padding(.vertical, 4)
-                            .frame(maxWidth: .infinity)
-                            .foregroundStyle(Color(.secondaryLabel))
-                    }
-                    .buttonStyle(.bordered)
-                    Spacer(minLength: 0)
-                }
-                .frame(height: viewHeight.flatMap { $0 * 0.45 })
+                formView
+                    .frame(height: viewHeight.flatMap { $0 * 0.45 })
             }
             .padding(.horizontal, 16)
             .background {
@@ -67,6 +60,11 @@ public struct KAEditorView: View {
             .navigationTitle("\(board.name)への掲示を作成")
             .navigationBarTitleDisplayMode(.inline)
             .errorAlert($error)
+            .alert("掲示を作成しました！", isPresented: $isCompletionAlertPresented) {
+                Button("OK") {
+                    dismiss()
+                }
+            }
             .sheet(isPresented: $isSheetPresented) {
                 sheetView
                     .presentationDetents([.fraction(0.45)])
@@ -74,14 +72,6 @@ public struct KAEditorView: View {
             .onAppear {
                 fetchPhrasesIfNeeded()
                 fetchWordImagesIfNeeded()
-            }
-            .task {
-                do {
-                    try await Task.sleep(for: .seconds(1))
-                    isSheetPresented = true
-                } catch {
-                    self.error = error
-                }
             }
         }
         .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
@@ -100,7 +90,9 @@ public struct KAEditorView: View {
                                 .frame(maxWidth: 72)
                         }
                     }
-                    cursorView
+                    if focusedTextField == nil {
+                        cursorView
+                    }
                     if wordImagesCountBeforeCursor < selectedWordImages.endIndex {
                         ForEach(selectedWordImages[wordImagesCountBeforeCursor ..< selectedWordImages.endIndex]) { wordImage in
                             KALazyImageView(data: wordImage.imageData)
@@ -125,18 +117,59 @@ public struct KAEditorView: View {
         }
     }
 
-    private var cursorView: some View {
-        Capsule()
-            .fill(Color.blue)
-            .frame(width: 2, height: 24)
-            .padding(.vertical, 12)
-            .opacity(isCursorDisplayed ? 1 : 0)
-            .animation(.smooth(duration: 0.5).repeatForever(), value: isCursorDisplayed)
-            .onAppear {
-                withAnimation {
-                    isCursorDisplayed = false
-                }
+    private var formView: some View {
+        VStack(spacing: 0) {
+            Spacer().frame(height: 20)
+            TextField("投稿者名", text: $authorName)
+                .focused($focusedTextField, equals: .authorName)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(in: .capsule)
+                .backgroundStyle(Color(.tertiarySystemBackground))
+            Spacer().frame(height: 12)
+            TextField("削除キー", text: Binding(
+                get: { deleteKey },
+                set: { deleteKey = String($0.prefix(deleteKeyMaxLength)) },
+            ))
+            .keyboardType(.numberPad)
+            .focused($focusedTextField, equals: .deleteKey)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(in: .capsule)
+            .backgroundStyle(Color(.tertiarySystemBackground))
+            Spacer(minLength: 12)
+            Button {
+                postEntry()
+            } label: {
+                Text("掲示する")
+                    .padding(.vertical, 4)
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.borderedProminent)
+            .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver || authorName.isEmpty || deleteKey.isEmpty)
+            Spacer().frame(height: 12)
+            Button {
+                isViewPresented = false
+            } label: {
+                Text("キャンセル")
+                    .padding(.vertical, 4)
+                    .frame(maxWidth: .infinity)
+                    .foregroundStyle(Color(.secondaryLabel))
+            }
+            .buttonStyle(.bordered)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var cursorView: some View {
+        TimelineView(.animation(minimumInterval: 0.5)) { timeline in
+            let isPresented = focusedTextField == nil && Int(timeline.date.timeIntervalSince1970 * 2) % 2 == 0
+            Capsule()
+                .fill(Color.blue)
+                .frame(width: 2, height: 24)
+                .padding(.vertical, 12)
+                .opacity(isPresented ? 1 : 0)
+        }
     }
 
     private var sheetView: some View {
@@ -281,6 +314,17 @@ public struct KAEditorView: View {
             self.error = error
         }
     }
+
+    private func postEntry() {
+        Task {
+            do {
+                try await apiService.postEntry(boardId: board.id, wordImages: selectedWordImages, authorName: authorName, deleteKey: deleteKey)
+                isCompletionAlertPresented = true
+            } catch {
+                self.error = error
+            }
+        }
+    }
 }
 
 #if DEBUG
@@ -299,6 +343,7 @@ public struct KAEditorView: View {
                 if let mockContainer {
                     KAEditorView(board: .mockBoards.first!, isPresented: $isPresented)
                         .modelContainer(mockContainer)
+                        .environment(\.apiService, KAMockApiService())
                 }
             }
             .task {

@@ -55,7 +55,7 @@ public struct KAKeijibanIndexView: View {
             }
             .task {
                 do {
-                    let fetchedBoards = try await apiService.fetchBoards()
+                    let fetchedBoards = try await apiService.fetchBoards(withEntries: true)
                     boards = fetchedBoards
                     selectedBoardId = fetchedBoards.first?.id
                     try? syncService.syncBoards(fetchedBoards: fetchedBoards)
