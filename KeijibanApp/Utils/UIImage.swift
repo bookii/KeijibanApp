@@ -3,6 +3,9 @@ import UIKit
 
 public extension UIImage {
     func resized(toFit size: CGSize) -> UIImage? {
+        guard size != .zero, self.size != .zero else {
+            return nil
+        }
         let aspectWidth = size.width / self.size.width
         let aspectHeight = size.height / self.size.height
         let aspectRatio = min(aspectWidth, aspectHeight)

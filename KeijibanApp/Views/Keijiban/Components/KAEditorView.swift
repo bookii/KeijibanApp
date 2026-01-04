@@ -129,7 +129,7 @@ public struct KAEditorView: View {
             Spacer().frame(height: 12)
             TextField("削除キー", text: Binding(
                 get: { deleteKey },
-                set: { deleteKey = String($0.prefix(deleteKeyMaxLength)) },
+                set: { deleteKey = String($0.filter(\.isNumber).prefix(deleteKeyMaxLength)) },
             ))
             .keyboardType(.numberPad)
             .focused($focusedTextField, equals: .deleteKey)

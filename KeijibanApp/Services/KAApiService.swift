@@ -36,10 +36,10 @@ public final class KAApiService: KAApiServiceProtocol {
     }
 
     public func postEntry(boardId: UUID, wordImages: [KAWordImage], authorName: String, deleteKey: String) async throws {
-        guard authorName.count > 0 else {
+        guard !authorName.isEmpty else {
             throw KALocalizedError.withMessage("authorName must not be empty")
         }
-        guard deleteKey.count > 0 else {
+        guard !deleteKey.isEmpty else {
             throw KALocalizedError.withMessage("deleteKey must not be empty")
         }
         let url = apiBaseURL.appendingPathComponent("/boards/\(boardId)/entries")
