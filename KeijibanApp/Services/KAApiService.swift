@@ -42,22 +42,22 @@ public final class KAApiService: KAApiServiceProtocol {
         guard deleteKey.count > 0 else {
             throw KALocalizedError.withMessage("deleteKey must not be empty")
         }
-        let base64EncodedStrings = wordImages.map { $0.imageData.base64EncodedString() }
         let url = apiBaseURL.appendingPathComponent("/boards/\(boardId)/entries")
+        let base64EncodedImages: [String] = wordImages.compactMap { wordImage in
+            UIImage(data: wordImage.imageData)?.resized(toFit: .init(width: 72, height: 48))?.jpegData(compressionQuality: 0.3)?.base64EncodedString()
+        }
         let requestBody = KCMPostEntriesRequestBody(
-            wordImages: wordImages.enumerated().map { index, wordImage in
-                .init(base64EncodedImage: wordImage.imageData.base64EncodedString(), index: index)
+            wordImages: base64EncodedImages.enumerated().map { index, base64EncodedImage in
+                .init(base64EncodedImage: base64EncodedImage, index: index)
             },
             authorName: authorName,
             deleteKey: deleteKey,
         )
-        _ = try await AF.request(url.absoluteString, method: .post, parameters: requestBody)
-            .serializingDecodable(EmptyResponse.self)
+        _ = try await AF.request(url.absoluteString, method: .post, parameters: requestBody, encoder: .json)
+            .serializingDecodable(Empty.self, emptyResponseCodes: Set(200 ..< 300))
             .value
     }
 }
-
-private nonisolated struct EmptyResponse: Decodable, Sendable {}
 
 #if DEBUG
     public final class KAMockApiService: KAApiServiceProtocol {

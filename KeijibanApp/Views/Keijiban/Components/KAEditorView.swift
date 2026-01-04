@@ -318,7 +318,7 @@ public struct KAEditorView: View {
     private func postEntry() {
         Task {
             do {
-                try await apiService.postEntry(boardId: board.id, wordImages: selectedWordImages, authorName: "", deleteKey: "")
+                try await apiService.postEntry(boardId: board.id, wordImages: selectedWordImages, authorName: authorName, deleteKey: deleteKey)
                 isCompletionAlertPresented = true
             } catch {
                 self.error = error

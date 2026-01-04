@@ -12,7 +12,7 @@ public struct KAEntry: Identifiable {
     public let wordImages: [WordImage]
     public let authorName: String
     public let likeCount: Int
-    public let createdAt: Date
+    public let createdAt: Int
 
     public init(from kcmEntryDTO: KCMEntryDTO) throws {
         guard let id = kcmEntryDTO.id else {
