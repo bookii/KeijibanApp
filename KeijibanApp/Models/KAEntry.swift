@@ -14,6 +14,15 @@ public struct KAEntry: Identifiable {
     public let likeCount: Int
     public let createdAt: Int
 
+    public init(id: UUID, boardId: UUID, wordImages: [WordImage], authorName: String, likeCount: Int, createdAt: Int) {
+        self.id = id
+        self.boardId = boardId
+        self.wordImages = wordImages
+        self.authorName = authorName
+        self.likeCount = likeCount
+        self.createdAt = createdAt
+    }
+
     public init(from kcmEntryDTO: KCMEntryDTO) throws {
         guard let id = kcmEntryDTO.id else {
             throw KALocalizedError.withMessage("id should not be nil")
@@ -42,4 +51,14 @@ public struct KAEntry: Identifiable {
         self.likeCount = likeCount
         self.createdAt = createdAt
     }
+}
+
+public extension KAEntry {
+    #if DEBUG
+        static func mockEntry() async -> Self {
+            let mockWordImages = await KAWordImage.mockWordImages()
+            return .init(id: .init(), boardId: .init(), wordImages: mockWordImages.map { .init(id: $0.id, imageData: $0.imageData) },
+                         authorName: "投稿者名", likeCount: 0, createdAt: Int(Date.now.timeIntervalSince1970))
+        }
+    #endif
 }

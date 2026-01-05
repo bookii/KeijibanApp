@@ -25,12 +25,11 @@ public struct KAIndexView: View {
         }
     }
 
-    @State private var boardBodyWidth: CGFloat?
-    private var boardBodyHeight: CGFloat? {
-        boardBodyWidth.map { $0 / 3 }
-    }
-
     @State private var viewHeight: CGFloat?
+    private var boardBodyHeight: CGFloat? { viewHeight.map { $0 / 4 } }
+    private var boardBodyWidth: CGFloat? {
+        viewHeight
+    }
 
     public init() {}
 
@@ -38,6 +37,7 @@ public struct KAIndexView: View {
         ZStack(alignment: .top) {
             Color(uiColor: .systemGray2)
                 .frame(width: 32)
+                .ignoresSafeArea()
             VStack(spacing: 16) {
                 Color(uiColor: .systemGray)
                     .overlay(alignment: .leading) {
@@ -80,13 +80,12 @@ public struct KAIndexView: View {
                     }
                     .frame(maxWidth: .infinity)
             }
-            .onGeometryChange(for: CGFloat.self, of: \.size.width) { width in
-                boardBodyWidth = width
-            }
             .offset(y: 16)
-            .padding(.horizontal, 48)
         }
-        .padding(.top, 32)
+        .padding(.top, 24)
+        .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
+            viewHeight = height
+        }
     }
 }
 

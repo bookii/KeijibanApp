@@ -9,7 +9,7 @@ public extension EnvironmentValues {
 
 @MainActor
 public protocol KAApiServiceProtocol {
-    func fetchBoards(withEntries: Bool) async throws -> [KABoard]
+    func fetchBoards(withEntries: Bool) async throws -> [KAFetchedBoard]
     func postEntry(boardId: UUID, wordImages: [KAWordImage], authorName: String, deleteKey: String) async throws
 }
 
@@ -27,21 +27,21 @@ public final class KAApiService: KAApiServiceProtocol {
 
     private init() {}
 
-    public func fetchBoards(withEntries: Bool) async throws -> [KABoard] {
+    public func fetchBoards(withEntries: Bool) async throws -> [KAFetchedBoard] {
         let url = apiBaseURL.appendingPathComponent("/boards")
         return try await AF.request(url.absoluteString, parameters: KCMGetBoardsRequestQuery(withEntries: withEntries))
             .serializingDecodable([KCMBoardDTO].self)
             .value
-            .map(KABoard.init(from:))
+            .map { try KAFetchedBoard(from: $0) }
     }
 
     public func postEntry(boardId: UUID, wordImages: [KAWordImage], authorName: String, deleteKey: String) async throws {
-        guard !authorName.isEmpty else {
-            throw KALocalizedError.withMessage("authorName must not be empty")
-        }
-        guard !deleteKey.isEmpty else {
-            throw KALocalizedError.withMessage("deleteKey must not be empty")
-        }
+//        guard !authorName.isEmpty else {
+//            throw KALocalizedError.withMessage("authorName must not be empty")
+//        }
+//        guard !deleteKey.isEmpty else {
+//            throw KALocalizedError.withMessage("deleteKey must not be empty")
+//        }
         let url = apiBaseURL.appendingPathComponent("/boards/\(boardId)/entries")
         let base64EncodedImages: [String] = wordImages.compactMap { wordImage in
             UIImage(data: wordImage.imageData)?.resized(toFit: .init(width: 72, height: 48))?.jpegData(compressionQuality: 0.3)?.base64EncodedString()
@@ -53,7 +53,7 @@ public final class KAApiService: KAApiServiceProtocol {
             authorName: authorName,
             deleteKey: deleteKey,
         )
-        _ = try await AF.request(url.absoluteString, method: .post, parameters: requestBody, encoder: .json)
+        _ = try await AF.request(url, method: .post, parameters: requestBody, encoder: .json)
             .serializingDecodable(Empty.self, emptyResponseCodes: Set(200 ..< 300))
             .value
     }
@@ -67,18 +67,12 @@ public final class KAApiService: KAApiServiceProtocol {
             self.shouldFail = shouldFail
         }
 
-        public func fetchBoards(withEntries _: Bool) async throws -> [KABoard] {
+        public func fetchBoards(withEntries _: Bool) async throws -> [KAFetchedBoard] {
             try await Task.sleep(for: .seconds(1))
             if shouldFail {
                 throw KALocalizedError.withMessage("Mock Failure")
             }
-            return [
-                .init(id: .init(uuidString: "bec571c3-688e-0809-6016-f72b5f616599")!, name: "新聞・雑誌部", index: 0),
-                .init(id: .init(uuidString: "c31feb82-21ea-6dda-bdc7-7e2f6f01d369")!, name: "手書き部", index: 1),
-                .init(id: .init(uuidString: "4779bc64-d847-efc5-c03a-b8b137ae5af0")!, name: "風景部", index: 2),
-                .init(id: .init(uuidString: "19e6655c-d191-54a6-c4af-6395cbcf4b1e")!, name: "作字部", index: 3),
-                .init(id: .init(uuidString: "e1205869-830b-a243-d96f-3cb141286458")!, name: "フリースタイル部", index: 4),
-            ]
+            return await KAFetchedBoard.mockFetchedBoards()
         }
 
         public func postEntry(boardId _: UUID, wordImages _: [KAWordImage], authorName _: String, deleteKey _: String) async throws {}

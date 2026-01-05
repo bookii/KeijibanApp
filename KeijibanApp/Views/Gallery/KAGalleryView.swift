@@ -44,18 +44,25 @@ public struct KAGalleryView: View {
 
     public var body: some View {
         NavigationStack {
-            GeometryReader { proxy in
-                ContentView(wordImages: filteredWordImages,
-                            columnCount: max(1, Int(proxy.size.width / 100)),
-                            selectedWordImages: $selectedWordImages)
-                    .ignoresSafeArea()
-                    .environment(\.onSelectWordImage) { wordImage in
-                        if !isSelectedWordImagesFull {
-                            selectedWordImages.append(wordImage)
+            VStack(spacing: 16) {
+                GeometryReader { proxy in
+                    ContentView(wordImages: filteredWordImages,
+                                rowCount: max(1, Int(proxy.size.height / 80)))
+                        .environment(\.onSelectWordImage) { wordImage in
+                            if !isSelectedWordImagesFull {
+                                selectedWordImages.append(wordImage)
+                            }
                         }
+                }
+                SelectedImagesView(selectedWordImages: $selectedWordImages)
+                    .padding(.horizontal, 16)
+                    .environment(\.onSavePhrase) {
+                        isSaveCompletionAlertPresented = true
                     }
+                    .opacity(selectedWordImages.isEmpty ? 0 : 1)
             }
-            .padding(.horizontal, 12)
+            .padding(.vertical, 16)
+            .ignoresSafeArea()
             .errorAlert($error)
             .sheet(item: $pickedImage) {
                 pickedImage = nil
@@ -65,23 +72,23 @@ public struct KAGalleryView: View {
             .sheet(isPresented: $isPhraseListViewPresented) {
                 KAPhraseListView()
             }
-            .overlay(alignment: .bottom) {
-                if !selectedWordImages.isEmpty {
-                    SelectedImagesView(selectedWordImages: $selectedWordImages)
-                        .padding(16)
-                        .environment(\.onSavePhrase) {
-                            isSaveCompletionAlertPresented = true
+            .overlay(alignment: .topLeading) {
+                HStack(spacing: 4) {
+                    PhotosPicker(selection: $pickerItem, matching: .images) {
+                        Label {
+                            Text("")
+                        } icon: {
+                            Image(systemName: "plus")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 16, height: 16)
+                                .padding(2)
                         }
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("", systemImage: "book.pages") {
-                        isPhraseListViewPresented = true
+                        .labelStyle(IconOnlyLabelStyle())
                     }
-                }
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Menu("", systemImage: "line.3.horizontal.decrease") {
+                    .buttonStyle(.glass)
+                    .clipShape(.circle)
+                    Menu {
                         Picker("", selection: $selectedFilter) {
                             Text("すべて")
                                 .tag(Filter.all)
@@ -90,11 +97,28 @@ public struct KAGalleryView: View {
                                     .tag(Filter.board(board.id))
                             }
                         }
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .padding(1)
                     }
-                    PhotosPicker(selection: $pickerItem, matching: .images) {
-                        Label("", systemImage: "plus")
+                    .buttonStyle(.glass)
+                    .clipShape(.circle)
+                    Button {
+                        isPhraseListViewPresented = true
+                    } label: {
+                        Image(systemName: "book.pages")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
                     }
+                    .buttonStyle(.glass)
+                    .clipShape(.circle)
                 }
+                .offset(x: 24, y: 24)
+                .ignoresSafeArea(edges: [.top, .leading])
             }
             .alert("フレーズを保存しました！", isPresented: $isSaveCompletionAlertPresented) {
                 Button("OK") {}
@@ -130,7 +154,7 @@ public struct KAGalleryView: View {
         }
 
         fileprivate var body: some View {
-            VStack(spacing: 8) {
+            HStack(spacing: 8) {
                 HStack(spacing: 8) {
                     KAPhrasedWordImagesView(wordImages: selectedWordImages)
                     Text("\(selectedWordImages.count)/\(KAGalleryView.selectedWordImagesLimit)")
@@ -144,59 +168,58 @@ public struct KAGalleryView: View {
                         .clipShape(.capsule)
                         .glassEffect()
                 }
-                .background(in: Capsule())
-                HStack(spacing: 6) {
-                    Button {
-                        selectedWordImages = []
-                    } label: {
-                        Image(systemName: "xmark")
-                            .frame(width: 32, height: 32)
-                    }
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.circle)
-                    Button {
-                        modelContext.insert(KAPhrase(wordImages: selectedWordImages))
-                        onSavePhrase?()
-                        selectedWordImages = []
-                    } label: {
-                        Text("フレーズを作成する")
-                            .frame(height: 32)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.glassProminent)
+                Button {
+                    modelContext.insert(KAPhrase(wordImages: selectedWordImages))
+                    onSavePhrase?()
+                    selectedWordImages = []
+                } label: {
+                    Text("フレーズを作成する")
+                        .frame(height: 24)
                 }
+                .buttonStyle(.glassProminent)
+                Button {
+                    selectedWordImages = []
+                } label: {
+                    Image(systemName: "xmark")
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .padding(4)
+                }
+                .background(in: Capsule())
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
             }
         }
     }
 
     private struct ContentView: View {
-        private let wordImagesInColumns: [[KAWordImage]]
-        private var columnCount: Int {
-            wordImagesInColumns.count
+        private let wordImagesInRows: [[KAWordImage]]
+        private var rowCount: Int {
+            wordImagesInRows.count
         }
 
-        fileprivate init(wordImages: [KAWordImage], columnCount: Int, selectedWordImages _: Binding<[KAWordImage]>) {
-            var wordImagesInColumns = Array(repeating: [KAWordImage](), count: columnCount)
+        fileprivate init(wordImages: [KAWordImage], rowCount: Int) {
+            var wordImagesInRows = Array(repeating: [KAWordImage](), count: rowCount)
             for index in wordImages.indices {
-                wordImagesInColumns[index % columnCount].append(wordImages[index])
+                wordImagesInRows[index % rowCount].append(wordImages[index])
             }
-            self.wordImagesInColumns = wordImagesInColumns
+            self.wordImagesInRows = wordImagesInRows
         }
 
         fileprivate var body: some View {
-            HStack(alignment: .top, spacing: KAGalleryView.spacing) {
-                ForEach(0 ..< columnCount, id: \.self) { columnIndex in
-                    ColumnView(wordImages: wordImagesInColumns[columnIndex])
+            VStack(alignment: .leading, spacing: KAGalleryView.spacing) {
+                ForEach(0 ..< rowCount, id: \.self) { columnIndex in
+                    RowView(wordImages: wordImagesInRows[columnIndex])
                 }
             }
         }
     }
 
-    private struct ColumnView: View {
+    private struct RowView: View {
         private let wordImages: [KAWordImage]
         @Environment(\.onSelectWordImage) private var onSelectWordImage
-        @State private var rowCount = KAGalleryView.displayedWordCount
-        @State private var viewWidth: CGFloat?
+        @State private var columnCount = KAGalleryView.displayedWordCount
+        @State private var viewHeight: CGFloat?
 
         fileprivate init(wordImages: [KAWordImage]) {
             self.wordImages = wordImages
@@ -206,26 +229,26 @@ public struct KAGalleryView: View {
             TimelineView(.animation) { context in
                 if !wordImages.isEmpty {
                     let elapsedTime = context.date.timeIntervalSince(KAGalleryView.startDate)
-                    ScrollView {
-                        LazyVStack(spacing: KAGalleryView.spacing) {
-                            ForEach(0 ..< rowCount, id: \.self) { rowIndex in
-                                let wordImage = wordImages[rowIndex % wordImages.count]
+                    ScrollView(.horizontal) {
+                        LazyHStack(spacing: KAGalleryView.spacing) {
+                            ForEach(0 ..< columnCount, id: \.self) { columnIndex in
+                                let wordImage = wordImages[columnIndex % wordImages.count]
                                 Button {
                                     onSelectWordImage?(wordImage)
                                 } label: {
                                     KALazyImageView(data: wordImage.imageData)
-                                        .frame(maxWidth: .infinity, maxHeight: viewWidth.flatMap { $0 * 1.5 }, alignment: .center)
+                                        .frame(maxWidth: viewHeight.map { $0 * 1.5 }, maxHeight: .infinity, alignment: .center)
                                         .id(wordImage.id)
                                         .onAppear {
-                                            if rowIndex == rowCount - 1 {
-                                                rowCount = rowCount + wordImages.count
+                                            if columnIndex == columnCount - 1 {
+                                                columnCount = columnCount + wordImages.count
                                             }
                                         }
                                         .rotationEffect(.degrees(180))
                                 }
                             }
                         }
-                        .offset(y: -elapsedTime * 100)
+                        .offset(x: -elapsedTime * 100)
                         .background(Color(.systemBackground))
                     }
                     .scrollIndicators(.never)
@@ -235,8 +258,8 @@ public struct KAGalleryView: View {
                 }
             }
             .rotationEffect(.degrees(180))
-            .onGeometryChange(for: CGFloat.self, of: \.size.width) { width in
-                viewWidth = width
+            .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
+                viewHeight = height
             }
         }
     }

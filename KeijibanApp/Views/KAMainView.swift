@@ -30,7 +30,7 @@ public struct KAMainView: View {
             if boards.isEmpty {
                 do {
                     let fetchedBoards = try await apiService.fetchBoards(withEntries: false)
-                    try syncService.syncBoards(fetchedBoards: fetchedBoards)
+                    try syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
                     for board in boards {
                         modelContext.insert(board)
                     }
