@@ -11,9 +11,9 @@ public struct KAKeijibanView: View {
     public var body: some View {
         VStack(spacing: 16) {
             Text(fetchedBoard.board.name)
-                .font(.title.bold())
-            if !fetchedBoard.entries.isEmpty {
-                VStack(spacing: 8) {
+                .font(.kuramubon(size: 24))
+            VStack(spacing: 8) {
+                if !fetchedBoard.entries.isEmpty {
                     let entry = fetchedBoard.entries[currentIndex]
                     KAFlowLayout(alignment: .leading, spacing: 4) {
                         ForEach(entry.wordImages) { wordImage in
@@ -25,40 +25,41 @@ public struct KAKeijibanView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     Spacer(minLength: 0)
                     Text(Date(timeIntervalSince1970: TimeInterval(entry.createdAt)).formatted(date: .long, time: .shortened))
+                } else {
+                    Text("掲示はありません")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .padding(16)
-                .frame(maxHeight: .infinity)
+            }
+            .padding(16)
+            .frame(maxHeight: .infinity)
+            .background(Color(.tertiarySystemGroupedBackground))
+            HStack(spacing: 16) {
+                Button {
+                    currentIndex += 1
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrowtriangle.backward.fill")
+                        Text("過去へ")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .foregroundStyle(Color(.secondaryLabel))
                 .background(Color(.tertiarySystemGroupedBackground))
-                HStack(spacing: 16) {
-                    Button {
-                        currentIndex += 1
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrowtriangle.backward.fill")
-                            Text("過去へ")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                .opacity(currentIndex < fetchedBoard.entries.endIndex - 1 ? 1 : 0)
+                Button {
+                    currentIndex -= 1
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("未来へ")
+                        Image(systemName: "arrowtriangle.forward.fill")
                     }
-                    .foregroundStyle(Color(.secondaryLabel))
-                    .background(Color(.tertiarySystemGroupedBackground))
-                    .opacity(currentIndex < fetchedBoard.entries.endIndex - 1 ? 1 : 0)
-                    Button {
-                        currentIndex -= 1
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("未来へ")
-                            Image(systemName: "arrowtriangle.forward.fill")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                    }
-                    .foregroundStyle(Color(.secondaryLabel))
-                    .background(Color(.tertiarySystemGroupedBackground))
-                    .opacity(currentIndex > 0 ? 1 : 0)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
                 }
-            } else {
-                Text("掲示はありません")
+                .foregroundStyle(Color(.secondaryLabel))
+                .background(Color(.tertiarySystemGroupedBackground))
+                .opacity(currentIndex > 0 ? 1 : 0)
             }
         }
         .padding(16)

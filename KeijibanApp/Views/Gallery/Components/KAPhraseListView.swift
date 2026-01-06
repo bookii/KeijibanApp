@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 public struct KAPhraseListView: View {
+    @Environment(\.dismiss) private var dismiss
     @Query private var phrases: [KAPhrase]
 
     private var phrasesByDate: [(Date, [KAPhrase])] {
@@ -22,8 +23,17 @@ public struct KAPhraseListView: View {
                     }
                 }
             }
-            .navigationTitle("作成したフレーズ")
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("作成したフレーズ")
+                        .font(.kiyosuna(size: 24, weight: .bold))
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("", systemImage: "xmark") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }
