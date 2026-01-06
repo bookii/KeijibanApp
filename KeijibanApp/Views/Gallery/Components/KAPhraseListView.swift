@@ -23,6 +23,8 @@ public struct KAPhraseListView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.kaSkyBlue)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("作成したフレーズ")

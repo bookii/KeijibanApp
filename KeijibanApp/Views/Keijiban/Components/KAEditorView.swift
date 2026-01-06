@@ -75,7 +75,7 @@ public struct KAEditorView: View {
         .padding(16)
         .ignoresSafeArea(edges: .vertical)
         .background {
-            Color(.systemGray6)
+            Color.kaSkyBlue
                 .ignoresSafeArea()
         }
         .errorAlert($error)
@@ -159,6 +159,7 @@ public struct KAEditorView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .tint(Color.kaGreen)
 //            .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver || authorName.isEmpty || deleteKey.isEmpty)
             .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver)
             .frame(maxWidth: .infinity)
@@ -235,7 +236,7 @@ public struct KAEditorView: View {
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
             }
-            .foregroundStyle(Color(.secondaryLabel))
+            .foregroundStyle(Color.kaGray)
         }
     }
 

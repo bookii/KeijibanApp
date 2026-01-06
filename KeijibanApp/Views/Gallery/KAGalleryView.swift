@@ -141,6 +141,7 @@ public struct KAGalleryView: View {
                     }
                 }
             }
+            .background(Color.kaSkyBlue)
         }
     }
 
@@ -177,6 +178,7 @@ public struct KAGalleryView: View {
                         .frame(height: 24)
                 }
                 .buttonStyle(.glassProminent)
+                .tint(.kaGreen)
                 Button {
                     selectedWordImages = []
                 } label: {
@@ -249,7 +251,7 @@ public struct KAGalleryView: View {
                             }
                         }
                         .offset(x: -elapsedTime * 80)
-                        .background(Color(.systemBackground))
+                        .background(Color.kaSkyBlue)
                     }
                     .scrollIndicators(.never)
                     .scrollEdgeEffectStyle(.none, for: .all)

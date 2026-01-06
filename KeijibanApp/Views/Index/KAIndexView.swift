@@ -35,15 +35,15 @@ public struct KAIndexView: View {
 
     public var body: some View {
         ZStack(alignment: .top) {
-            Color(uiColor: .systemGray2)
+            Color.kaLightBrown
                 .frame(width: 32)
                 .ignoresSafeArea()
             VStack(spacing: 16) {
-                Color(uiColor: .systemGray)
+                Color.brown
                     .overlay(alignment: .leading) {
                         if let boardBodyHeight {
                             ArrowHead(direction: .left)
-                                .fill(Color(uiColor: .systemGray))
+                                .fill(Color.brown)
                                 .frame(width: boardBodyHeight / 4, height: boardBodyHeight)
                                 .offset(x: -boardBodyHeight / 4)
                         }
@@ -55,15 +55,15 @@ public struct KAIndexView: View {
                                 .font(.kuramubon(size: 32))
                             Text("日常にあふれる字を記録しよう")
                         }
-                        
+
                         .foregroundStyle(Color.white)
                     }
                     .frame(maxWidth: .infinity)
-                Color(uiColor: .systemGray)
+                Color.brown
                     .overlay(alignment: .trailing) {
                         if let boardBodyHeight {
                             ArrowHead(direction: .right)
-                                .fill(Color(uiColor: .systemGray))
+                                .fill(Color.brown)
                                 .frame(width: boardBodyHeight / 4, height: boardBodyHeight)
                                 .offset(x: boardBodyHeight / 4)
                         }
@@ -82,6 +82,7 @@ public struct KAIndexView: View {
             .offset(y: 16)
         }
         .padding(.top, 24)
+        .background(Color.kaSkyBlue)
         .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
             viewHeight = height
         }
