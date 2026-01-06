@@ -248,7 +248,7 @@ public struct KAGalleryView: View {
                                 }
                             }
                         }
-                        .offset(x: -elapsedTime * 100)
+                        .offset(x: -elapsedTime * 80)
                         .background(Color(.systemBackground))
                     }
                     .scrollIndicators(.never)

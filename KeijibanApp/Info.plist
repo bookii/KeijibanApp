@@ -6,5 +6,11 @@
 	<array>
 		<string>ja</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Kuramubon.otf</string>
+		<string>KiyosunaSans-L-1.0.1.otf</string>
+		<string>KiyosunaSans-B-1.0.1.otf</string>
+	</array>
 </dict>
 </plist>

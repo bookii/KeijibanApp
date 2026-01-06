@@ -51,11 +51,11 @@ public struct KAIndexView: View {
                     .frame(width: boardBodyWidth, height: boardBodyHeight)
                     .overlay {
                         VStack(spacing: 8) {
-                            Text("文字あつめ")
-                                .font(.title.bold())
-                            Text("ここに説明文が入ります")
-                                .font(.body)
+                            Text("ミュー字アム")
+                                .font(.kuramubon(size: 32))
+                            Text("日常にあふれる字を記録しよう")
                         }
+                        
                         .foregroundStyle(Color.white)
                     }
                     .frame(maxWidth: .infinity)
@@ -72,9 +72,8 @@ public struct KAIndexView: View {
                     .overlay {
                         VStack(spacing: 8) {
                             Text("ケイ字バン")
-                                .font(.title.bold())
-                            Text("ここに説明文が入ります")
-                                .font(.body)
+                                .font(.kuramubon(size: 32))
+                            Text("みんなで楽しむ字のひろば")
                         }
                         .foregroundStyle(Color.white)
                     }
