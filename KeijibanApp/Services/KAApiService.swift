@@ -53,7 +53,7 @@ public final class KAApiService: KAApiServiceProtocol {
             authorName: authorName,
             deleteKey: deleteKey,
         )
-        _ = try await AF.request(url, method: .post, parameters: requestBody, encoder: .json)
+        _ = try await AF.request(url.absoluteString, method: .post, parameters: requestBody, encoder: .json)
             .serializingDecodable(Empty.self, emptyResponseCodes: Set(200 ..< 300))
             .value
     }
