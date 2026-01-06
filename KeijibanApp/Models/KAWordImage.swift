@@ -41,7 +41,7 @@ public extension KAWordImage {
                 guard let imageData = $0.storedImage.jpegData(compressionQuality: 0.9) else {
                     return nil
                 }
-                return .init(id: .init(), text: $0.text, imageData: imageData, board: .mockBoards.randomElement()!)
+                return .init(id: .init(), text: $0.text, imageData: imageData, board: .mockBoards().randomElement()!)
             }
             _mockWordImages = mockWordImages
             return mockWordImages

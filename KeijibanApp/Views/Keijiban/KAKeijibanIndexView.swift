@@ -1,73 +1,100 @@
+import KeijibanCommonModule
 import SwiftUI
 
 public struct KAKeijibanIndexView: View {
     @Environment(\.apiService) private var apiService
     @Environment(\.syncService) private var syncService
-    @State private var boards: [KABoard]?
+    @State private var fetchedBoards: [KAFetchedBoard]?
     @State private var selectedBoardId: UUID?
     @State private var viewHeight: CGFloat?
     @State private var isEditorSheetPresented: Bool = false
     @State private var error: Error?
-    private var selectedBoard: KABoard? {
-        boards?.first(where: { $0.id == selectedBoardId })
+    private var selectedBoard: KAFetchedBoard? {
+        fetchedBoards?.first(where: { $0.board.id == selectedBoardId })
     }
 
     public init() {}
 
     public var body: some View {
-        NavigationStack {
-            ScrollView {
-                if let boards {
-                    LazyVStack(spacing: 0) {
-                        ForEach(boards) { board in
-                            Text(board.name)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: viewHeight)
-                                .id(board.id)
+        HStack(spacing: 0) {
+            if let fetchedBoards {
+                curtainView
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 0) {
+                        ForEach(fetchedBoards) { fetchedBoard in
+                            KAKeijibanView(fetchedBoard: fetchedBoard)
+                                .frame(width: viewHeight.flatMap { $0 * 1.5 })
+                                .frame(maxHeight: .infinity)
+                                .id(fetchedBoard.board.id)
                         }
                     }
                     .scrollTargetLayout()
-                } else {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: viewHeight)
                 }
-            }
-            .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
-                viewHeight = height
-            }
-            .scrollTargetBehavior(.paging)
-            .scrollPosition(id: $selectedBoardId)
-            .scrollIndicators(.hidden)
-            .errorAlert($error)
-            .fullScreenCover(isPresented: $isEditorSheetPresented) {
-                if let selectedBoard {
-                    KAEditorView(board: selectedBoard, isPresented: $isEditorSheetPresented)
+                .scrollPosition(id: $selectedBoardId)
+                .scrollTargetBehavior(.paging)
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
+                .frame(width: viewHeight.flatMap { $0 * 1.5 })
+                .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
+                    viewHeight = height
                 }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("", systemImage: "square.and.pencil") {
-                        isEditorSheetPresented = true
-                    }
-                    .disabled(selectedBoardId == nil)
-                }
-            }
-            .task {
-                do {
-                    let fetchedBoards = try await apiService.fetchBoards(withEntries: true)
-                    boards = fetchedBoards
-                    selectedBoardId = fetchedBoards.first?.id
-                    try? syncService.syncBoards(fetchedBoards: fetchedBoards)
-                } catch let error as KALocalizedError {
-                    self.error = error
-                    boards = []
-                } catch {
-                    self.error = KALocalizedError.wrapping(error)
-                    boards = []
-                }
+                curtainView
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .ignoresSafeArea()
+        .scrollEdgeEffectHidden()
+        .overlay(alignment: .topTrailing) {
+            Button {
+                isEditorSheetPresented = true
+            } label: {
+                Image(systemName: "square.and.pencil")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .offset(x: 1, y: -1)
+                    .padding(1)
+            }
+            .buttonStyle(.glass)
+            .clipShape(.circle)
+            .offset(x: -24, y: 24)
+            .ignoresSafeArea(edges: [.top, .trailing])
+        }
+        .errorAlert($error)
+        .fullScreenCover(isPresented: $isEditorSheetPresented) {
+            if let selectedBoard {
+                KAEditorView(board: selectedBoard.board, isPresented: $isEditorSheetPresented)
+            } else {
+                Color.clear
+                    .onAppear {
+                        isEditorSheetPresented = false
+                    }
+            }
+        }
+        .task {
+            do {
+                let fetchedBoards = try await apiService.fetchBoards(withEntries: true)
+                self.fetchedBoards = fetchedBoards
+                selectedBoardId = fetchedBoards.first?.board.id
+                try? syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
+            } catch let error as KALocalizedError {
+                self.error = error
+                fetchedBoards = []
+            } catch {
+                self.error = KALocalizedError.wrapping(error)
+                fetchedBoards = []
+            }
+        }
+    }
+
+    private var curtainView: some View {
+        Rectangle()
+            .fill(Color.black.opacity(0.5))
+            .frame(maxHeight: .infinity)
+            .ignoresSafeArea()
+            .zIndex(1)
     }
 }
 

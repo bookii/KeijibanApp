@@ -42,37 +42,51 @@ public struct KAEditorView: View {
     }
 
     public var body: some View {
-        NavigationStack {
-            VStack(spacing: 4) {
-                selectedWordImagesView
-                    .onTapGesture {
-                        isSheetPresented = true
-                        focusedTextField = nil
+        VStack(spacing: 16) {
+            Text("\(board.name)への掲示を作成")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .overlay(alignment: .trailing) {
+                    Button {
+                        isViewPresented = false
+                    } label: {
+                        Image(systemName: "xmark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
+                            .foregroundStyle(Color(.secondaryLabel))
                     }
-                formView
-                    .frame(height: viewHeight.flatMap { $0 * 0.45 })
-            }
-            .padding(.horizontal, 16)
-            .background {
-                Color(.systemGray6)
-                    .ignoresSafeArea()
-            }
-            .navigationTitle("\(board.name)への掲示を作成")
-            .navigationBarTitleDisplayMode(.inline)
-            .errorAlert($error)
-            .alert("掲示を作成しました！", isPresented: $isCompletionAlertPresented) {
-                Button("OK") {
-                    dismiss()
                 }
+            HStack(spacing: 16) {
+                VStack(spacing: 16) {
+                    selectedWordImagesView
+                        .onTapGesture {
+                            isSheetPresented = true
+                            focusedTextField = nil
+                        }
+                        .frame(maxHeight: .infinity)
+                    formView
+                }
+                .frame(maxWidth: .infinity)
+                pickerView
+                    .frame(maxWidth: .infinity)
             }
-            .sheet(isPresented: $isSheetPresented) {
-                sheetView
-                    .presentationDetents([.fraction(0.45)])
+        }
+        .padding(16)
+        .ignoresSafeArea(edges: .vertical)
+        .background {
+            Color(.systemGray6)
+                .ignoresSafeArea()
+        }
+        .errorAlert($error)
+        .alert("掲示を作成しました！", isPresented: $isCompletionAlertPresented) {
+            Button("OK") {
+                dismiss()
             }
-            .onAppear {
-                fetchPhrasesIfNeeded()
-                fetchWordImagesIfNeeded()
-            }
+        }
+        .onAppear {
+            fetchPhrasesIfNeeded()
+            fetchWordImagesIfNeeded()
         }
         .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
             viewHeight = height
@@ -118,46 +132,47 @@ public struct KAEditorView: View {
     }
 
     private var formView: some View {
-        VStack(spacing: 0) {
-            Spacer().frame(height: 20)
-            TextField("投稿者名", text: $authorName)
-                .focused($focusedTextField, equals: .authorName)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(in: .capsule)
-                .backgroundStyle(Color(.tertiarySystemBackground))
-            Spacer().frame(height: 12)
-            TextField("削除キー", text: Binding(
-                get: { deleteKey },
-                set: { deleteKey = String($0.filter(\.isNumber).prefix(deleteKeyMaxLength)) },
-            ))
-            .keyboardType(.numberPad)
-            .focused($focusedTextField, equals: .deleteKey)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(in: .capsule)
-            .backgroundStyle(Color(.tertiarySystemBackground))
-            Spacer(minLength: 12)
+        VStack(spacing: 12) {
+//            Spacer().frame(height: 20)
+//            TextField("投稿者名", text: $authorName)
+//                .focused($focusedTextField, equals: .authorName)
+//                .padding(.horizontal, 12)
+//                .padding(.vertical, 8)
+//                .background(in: .capsule)
+//                .backgroundStyle(Color(.tertiarySystemBackground))
+//            TextField("削除キー", text: Binding(
+//                get: { deleteKey },
+//                set: { deleteKey = String($0.filter(\.isNumber).prefix(deleteKeyMaxLength)) },
+//            ))
+//            .keyboardType(.numberPad)
+//            .focused($focusedTextField, equals: .deleteKey)
+//            .padding(.horizontal, 12)
+//            .padding(.vertical, 8)
+//            .background(in: .capsule)
+//            .backgroundStyle(Color(.tertiarySystemBackground))
+//            HStack(spacing: 10) {
             Button {
                 postEntry()
             } label: {
                 Text("掲示する")
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 2)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver || authorName.isEmpty || deleteKey.isEmpty)
-            Spacer().frame(height: 12)
-            Button {
-                isViewPresented = false
-            } label: {
-                Text("キャンセル")
-                    .padding(.vertical, 4)
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(Color(.secondaryLabel))
-            }
-            .buttonStyle(.bordered)
-            Spacer(minLength: 0)
+//            .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver || authorName.isEmpty || deleteKey.isEmpty)
+            .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver)
+            .frame(maxWidth: .infinity)
+//                Button {
+//                    isViewPresented = false
+//                } label: {
+//                    Text("キャンセル")
+//                        .padding(.vertical, 2)
+//                        .frame(maxWidth: .infinity)
+//                        .foregroundStyle(Color(.secondaryLabel))
+//                }
+//                .buttonStyle(.bordered)
+//                .frame(maxWidth: .infinity)
+//            }
         }
     }
 
@@ -172,7 +187,7 @@ public struct KAEditorView: View {
         }
     }
 
-    private var sheetView: some View {
+    private var pickerView: some View {
         VStack(spacing: 12) {
             Picker("", selection: $selectedListType) {
                 Text("フレーズ")
@@ -221,11 +236,6 @@ public struct KAEditorView: View {
                 .buttonBorderShape(.capsule)
             }
             .foregroundStyle(Color(.secondaryLabel))
-        }
-        .padding(16)
-        .background {
-            Color(.secondarySystemBackground)
-                .ignoresSafeArea()
         }
     }
 
@@ -341,7 +351,7 @@ public struct KAEditorView: View {
             }
             .fullScreenCover(isPresented: $isPresented) {
                 if let mockContainer {
-                    KAEditorView(board: .mockBoards.first!, isPresented: $isPresented)
+                    KAEditorView(board: .mockBoards().first!, isPresented: $isPresented)
                         .modelContainer(mockContainer)
                         .environment(\.apiService, KAMockApiService())
                 }
