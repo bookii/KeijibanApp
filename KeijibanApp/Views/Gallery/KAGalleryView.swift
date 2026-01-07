@@ -109,6 +109,7 @@ public struct KAGalleryView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 18, height: 18)
+                            .offset(y: 0.5)
                             .padding(1)
                     }
                     .buttonStyle(.glass)
@@ -119,6 +120,7 @@ public struct KAGalleryView: View {
                         Image(systemName: "book.pages")
                             .resizable()
                             .scaledToFit()
+                            .offset(x: -0.5, y: -0.5)
                             .frame(width: 20, height: 20)
                     }
                     .buttonStyle(.glass)
