@@ -16,7 +16,7 @@ public struct KAPhraseListView: View {
         NavigationStack {
             List {
                 ForEach(phrasesByDate, id: \.0) { date, phrases in
-                    Section(date.formatted(date: .numeric, time: .omitted)) {
+                    Section(header: Text(date.formatted(date: .numeric, time: .omitted)).font(.kiyosuna(size: 16, weight: .bold))) {
                         ForEach(phrases.sorted { $0.createdAt > $1.createdAt }) { phrase in
                             KAPhrasedWordImagesView(wordImages: phrase.wordImages)
                         }

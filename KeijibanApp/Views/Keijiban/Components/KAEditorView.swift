@@ -44,7 +44,7 @@ public struct KAEditorView: View {
     public var body: some View {
         VStack(spacing: 16) {
             Text("\(board.name)への掲示を作成")
-                .font(.headline)
+                .font(.kiyosuna(size: 24, weight: .bold))
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .trailing) {
                     Button {
@@ -124,7 +124,7 @@ public struct KAEditorView: View {
             .defaultScrollAnchor(.bottom, for: .sizeChanges)
             .background(in: RoundedRectangle(cornerRadius: 16))
             Text("\(selectedWordImages.count)/\(wordImagesLimit)")
-                .font(.system(size: 14))
+                .font(.kiyosuna(size: 14))
                 .foregroundStyle(Color(isSelectedWordImagesOver ? .systemRed : .secondaryLabel))
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.trailing, 4)
