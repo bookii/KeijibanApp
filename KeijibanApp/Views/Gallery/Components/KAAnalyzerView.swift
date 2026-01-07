@@ -50,7 +50,20 @@ public struct KAAnalyzerView: View {
         let isWordFound = !analyzeData.wordImages.isEmpty
         return VStack(spacing: 12) {
             Text(isWordFound ? "ワードを見つけました！" : "ワードが見つかりませんでした……")
-                .font(.system(size: 24, weight: .bold))
+                .font(.kiyosuna(size: 24, weight: .bold))
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
+                .overlay(alignment: .leading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
+                            .foregroundStyle(Color(.secondaryLabel))
+                    }
+                }
             imagesView(analyzeData: analyzeData)
             if isWordFound {
                 pickerView
