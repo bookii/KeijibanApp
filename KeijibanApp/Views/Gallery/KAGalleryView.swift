@@ -45,21 +45,26 @@ public struct KAGalleryView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                GeometryReader { proxy in
-                    ContentView(wordImages: filteredWordImages,
-                                rowCount: max(1, Int(proxy.size.height / 80)))
-                        .environment(\.onSelectWordImage) { wordImage in
-                            if !isSelectedWordImagesFull {
-                                selectedWordImages.append(wordImage)
+                if !filteredWordImages.isEmpty {
+                    GeometryReader { proxy in
+                        ContentView(wordImages: filteredWordImages,
+                                    rowCount: max(1, Int(proxy.size.height / 80)))
+                            .environment(\.onSelectWordImage) { wordImage in
+                                if !isSelectedWordImagesFull {
+                                    selectedWordImages.append(wordImage)
+                                }
                             }
-                        }
-                }
-                SelectedImagesView(selectedWordImages: $selectedWordImages)
-                    .padding(.horizontal, 16)
-                    .environment(\.onSavePhrase) {
-                        isSaveCompletionAlertPresented = true
                     }
-                    .opacity(selectedWordImages.isEmpty ? 0 : 1)
+                    SelectedImagesView(selectedWordImages: $selectedWordImages)
+                        .padding(.horizontal, 16)
+                        .environment(\.onSavePhrase) {
+                            isSaveCompletionAlertPresented = true
+                        }
+                        .opacity(selectedWordImages.isEmpty ? 0 : 1)
+                } else {
+                    Text("+ボタンで写真を読み込んでみよう")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             }
             .padding(.vertical, 16)
             .ignoresSafeArea()
