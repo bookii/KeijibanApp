@@ -23,7 +23,6 @@ public struct KAGalleryView: View {
     }
 
     private static let spacing: CGFloat = 12
-    private static let startDate = Date()
     private static let displayedWordCount: Int = 100
     private static let selectedWordImagesLimit: Int = 10
     @Environment(\.modelContext) private var modelContext
@@ -228,6 +227,7 @@ public struct KAGalleryView: View {
         @Environment(\.onSelectWordImage) private var onSelectWordImage
         @State private var columnCount = KAGalleryView.displayedWordCount
         @State private var viewHeight: CGFloat?
+        @State private var startDate = Date()
 
         fileprivate init(wordImages: [KAWordImage]) {
             self.wordImages = wordImages
@@ -236,7 +236,7 @@ public struct KAGalleryView: View {
         fileprivate var body: some View {
             TimelineView(.animation) { context in
                 if !wordImages.isEmpty {
-                    let elapsedTime = context.date.timeIntervalSince(KAGalleryView.startDate)
+                    let elapsedTime = context.date.timeIntervalSince(startDate)
                     ScrollView(.horizontal) {
                         LazyHStack(spacing: KAGalleryView.spacing) {
                             ForEach(0 ..< columnCount, id: \.self) { columnIndex in

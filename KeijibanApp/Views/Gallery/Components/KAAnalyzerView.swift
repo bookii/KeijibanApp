@@ -48,31 +48,37 @@ public struct KAAnalyzerView: View {
 
     private func resultView(analyzeData: KAAnalyzeData) -> some View {
         let isWordFound = !analyzeData.wordImages.isEmpty
-        return VStack(spacing: 12) {
-            Text(isWordFound ? "ワードを見つけました！" : "ワードが見つかりませんでした……")
-                .font(.kiyosuna(size: 24, weight: .bold))
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16)
-                .overlay(alignment: .leading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 16, height: 16)
-                            .foregroundStyle(Color(.secondaryLabel))
+        return HStack(spacing: 24) {
+            VStack(spacing: 12) {
+                Text(isWordFound ? "ワードを見つけました！" : "ワードが見つかりませんでした……")
+                    .font(.kiyosuna(size: 24, weight: .bold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 16)
+                    .overlay(alignment: .leading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 16, height: 16)
+                                .foregroundStyle(Color(.secondaryLabel))
+                        }
                     }
+                Spacer(minLength: 0)
+                if isWordFound {
+                    pickerView
+                    saveButton(analyzeData: analyzeData)
+                        .buttonStyle(.glassProminent)
+                        .disabled(selectedBoard == nil)
                 }
-            imagesView(analyzeData: analyzeData)
-            if isWordFound {
-                pickerView
-                saveButton(analyzeData: analyzeData)
-                    .buttonStyle(.glassProminent)
-                    .disabled(selectedBoard == nil)
             }
+            .frame(maxWidth: .infinity)
+            imagesView(analyzeData: analyzeData)
+                .frame(maxWidth: .infinity)
         }
-        .padding(16)
+        .padding(.vertical, 16)
+        .safeAreaPadding(.horizontal, 24)
     }
 
     private func imagesView(analyzeData: KAAnalyzeData) -> some View {
@@ -98,7 +104,7 @@ public struct KAAnalyzerView: View {
             }
         }
         .clipped()
-        .frame(maxHeight: .infinity, alignment: .top)
+        .frame(maxHeight: .infinity, alignment: .center)
         .onGeometryChange(for: CGSize.self, of: \.size) { containerSize in
             let imageSize = analyzeData.originalImage.size
             guard imageSize != .zero else {
