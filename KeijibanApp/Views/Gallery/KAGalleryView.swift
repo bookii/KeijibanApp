@@ -256,7 +256,7 @@ public struct KAGalleryView: View {
                                         .padding(4)
                                         .background(Color.white)
                                         .shadow(radius: 1)
-                                        .border(Color.kaGalleryBorder, width: 2)
+                                        .border(Color.kaBorder, width: 2)
                                 }
                             }
                         }

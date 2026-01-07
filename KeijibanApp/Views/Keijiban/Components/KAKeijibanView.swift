@@ -38,6 +38,7 @@ public struct KAKeijibanView: View {
             .padding(16)
             .frame(maxHeight: .infinity)
             .background(Color.kaKeijibanSecondaryBackground)
+            .border(Color.kaBorder, width: 4)
             HStack(spacing: 16) {
                 Button {
                     currentIndex += 1
@@ -51,6 +52,7 @@ public struct KAKeijibanView: View {
                 }
                 .foregroundStyle(Color.kaGray)
                 .background(Color.kaLightGray)
+                .clipShape(.capsule)
                 .opacity(currentIndex < entries.endIndex - 1 ? 1 : 0)
                 Button {
                     currentIndex -= 1
@@ -64,6 +66,7 @@ public struct KAKeijibanView: View {
                 }
                 .foregroundStyle(Color.kaGray)
                 .background(Color.kaLightGray)
+                .clipShape(.capsule)
                 .opacity(currentIndex > 0 ? 1 : 0)
             }
         }
