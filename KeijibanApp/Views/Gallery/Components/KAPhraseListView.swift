@@ -14,13 +14,21 @@ public struct KAPhraseListView: View {
 
     public var body: some View {
         NavigationStack {
-            List {
-                ForEach(phrasesByDate, id: \.0) { date, phrases in
-                    Section(header: Text(date.formatted(date: .numeric, time: .omitted)).font(.kiyosuna(size: 16, weight: .bold))) {
-                        ForEach(phrases.sorted { $0.createdAt > $1.createdAt }) { phrase in
-                            KAPhrasedWordImagesView(wordImages: phrase.wordImages)
+            Group {
+                if !phrases.isEmpty {
+                    List {
+                        ForEach(phrasesByDate, id: \.0) { date, phrases in
+                            Section(header: Text(date.formatted(date: .numeric, time: .omitted)).font(.kiyosuna(size: 16, weight: .bold))) {
+                                ForEach(phrases.sorted { $0.createdAt > $1.createdAt }) { phrase in
+                                    KAPhrasedWordImagesView(wordImages: phrase.wordImages)
+                                }
+                            }
                         }
                     }
+                } else {
+                    Text("作成したフレーズはありません")
+                        .offset(y: -8)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .scrollContentBackground(.hidden)

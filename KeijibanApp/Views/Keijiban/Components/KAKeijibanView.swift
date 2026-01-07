@@ -1,21 +1,23 @@
 import SwiftUI
 
 public struct KAKeijibanView: View {
-    private let fetchedBoard: KAFetchedBoard
+    private let boardName: String
+    private let entries: [KAEntry]
     @State private var currentIndex: Int = 0
 
     public init(fetchedBoard: KAFetchedBoard) {
-        self.fetchedBoard = fetchedBoard
+        boardName = fetchedBoard.board.name
+        entries = fetchedBoard.entries.sorted { $0.createdAt > $1.createdAt }
     }
 
     public var body: some View {
         VStack(spacing: 16) {
-            Text(fetchedBoard.board.name)
+            Text(boardName)
                 .font(.kuramubon(size: 24))
                 .foregroundStyle(Color.white)
             VStack(spacing: 8) {
-                if !fetchedBoard.entries.isEmpty {
-                    let entry = fetchedBoard.entries[currentIndex]
+                if !entries.isEmpty {
+                    let entry = entries[currentIndex]
                     KAFlowLayout(alignment: .leading, spacing: 4) {
                         ForEach(entry.wordImages) { wordImage in
                             KALazyImageView(data: wordImage.imageData)
@@ -36,6 +38,7 @@ public struct KAKeijibanView: View {
             .padding(16)
             .frame(maxHeight: .infinity)
             .background(Color.kaKeijibanSecondaryBackground)
+            .border(Color.kaBorder, width: 4)
             HStack(spacing: 16) {
                 Button {
                     currentIndex += 1
@@ -49,7 +52,8 @@ public struct KAKeijibanView: View {
                 }
                 .foregroundStyle(Color.kaGray)
                 .background(Color.kaLightGray)
-                .opacity(currentIndex < fetchedBoard.entries.endIndex - 1 ? 1 : 0)
+                .clipShape(.capsule)
+                .opacity(currentIndex < entries.endIndex - 1 ? 1 : 0)
                 Button {
                     currentIndex -= 1
                 } label: {
@@ -62,6 +66,7 @@ public struct KAKeijibanView: View {
                 }
                 .foregroundStyle(Color.kaGray)
                 .background(Color.kaLightGray)
+                .clipShape(.capsule)
                 .opacity(currentIndex > 0 ? 1 : 0)
             }
         }

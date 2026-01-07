@@ -20,7 +20,7 @@ public struct KAKeijibanIndexView: View {
             if let fetchedBoards {
                 curtainView
                 ScrollView(.horizontal) {
-                    LazyHStack(spacing: 0) {
+                    HStack(spacing: 0) {
                         ForEach(fetchedBoards) { fetchedBoard in
                             KAKeijibanView(fetchedBoard: fetchedBoard)
                                 .frame(width: viewHeight.flatMap { $0 * 1.5 })

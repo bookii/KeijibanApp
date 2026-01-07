@@ -133,24 +133,6 @@ public struct KAEditorView: View {
 
     private var formView: some View {
         VStack(spacing: 12) {
-//            Spacer().frame(height: 20)
-//            TextField("投稿者名", text: $authorName)
-//                .focused($focusedTextField, equals: .authorName)
-//                .padding(.horizontal, 12)
-//                .padding(.vertical, 8)
-//                .background(in: .capsule)
-//                .backgroundStyle(Color(.tertiarySystemBackground))
-//            TextField("削除キー", text: Binding(
-//                get: { deleteKey },
-//                set: { deleteKey = String($0.filter(\.isNumber).prefix(deleteKeyMaxLength)) },
-//            ))
-//            .keyboardType(.numberPad)
-//            .focused($focusedTextField, equals: .deleteKey)
-//            .padding(.horizontal, 12)
-//            .padding(.vertical, 8)
-//            .background(in: .capsule)
-//            .backgroundStyle(Color(.tertiarySystemBackground))
-//            HStack(spacing: 10) {
             Button {
                 postEntry()
             } label: {
@@ -159,20 +141,8 @@ public struct KAEditorView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-//            .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver || authorName.isEmpty || deleteKey.isEmpty)
             .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver)
             .frame(maxWidth: .infinity)
-//                Button {
-//                    isViewPresented = false
-//                } label: {
-//                    Text("キャンセル")
-//                        .padding(.vertical, 2)
-//                        .frame(maxWidth: .infinity)
-//                        .foregroundStyle(Color(.secondaryLabel))
-//                }
-//                .buttonStyle(.bordered)
-//                .frame(maxWidth: .infinity)
-//            }
         }
     }
 
