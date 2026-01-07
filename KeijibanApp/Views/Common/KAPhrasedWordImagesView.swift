@@ -21,6 +21,7 @@ public struct KAPhrasedWordImagesView: View {
                 }
             }
             .scrollIndicators(.never)
+            .scrollContentBackground(.hidden)
             .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
             .defaultScrollAnchor(isInitiallyLoaded ? .trailing : nil, for: .sizeChanges)
             .onAppear {

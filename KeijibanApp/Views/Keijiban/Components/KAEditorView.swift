@@ -44,7 +44,7 @@ public struct KAEditorView: View {
     public var body: some View {
         VStack(spacing: 16) {
             Text("\(board.name)への掲示を作成")
-                .font(.headline)
+                .font(.kiyosuna(size: 24, weight: .bold))
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .trailing) {
                     Button {
@@ -75,7 +75,7 @@ public struct KAEditorView: View {
         .padding(16)
         .ignoresSafeArea(edges: .vertical)
         .background {
-            Color(.systemGray6)
+            Color.kaSkyBlue
                 .ignoresSafeArea()
         }
         .errorAlert($error)
@@ -124,7 +124,7 @@ public struct KAEditorView: View {
             .defaultScrollAnchor(.bottom, for: .sizeChanges)
             .background(in: RoundedRectangle(cornerRadius: 16))
             Text("\(selectedWordImages.count)/\(wordImagesLimit)")
-                .font(.system(size: 14))
+                .font(.kiyosuna(size: 14))
                 .foregroundStyle(Color(isSelectedWordImagesOver ? .systemRed : .secondaryLabel))
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.trailing, 4)
@@ -180,7 +180,7 @@ public struct KAEditorView: View {
         TimelineView(.animation(minimumInterval: 0.5)) { timeline in
             let isPresented = focusedTextField == nil && Int(timeline.date.timeIntervalSince1970 * 2) % 2 == 0
             Capsule()
-                .fill(Color.blue)
+                .fill(Color.accentColor)
                 .frame(width: 2, height: 24)
                 .padding(.vertical, 12)
                 .opacity(isPresented ? 1 : 0)
@@ -235,7 +235,7 @@ public struct KAEditorView: View {
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
             }
-            .foregroundStyle(Color(.secondaryLabel))
+            .foregroundStyle(Color.kaGray)
         }
     }
 

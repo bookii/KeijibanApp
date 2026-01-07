@@ -12,6 +12,7 @@ public struct KAKeijibanView: View {
         VStack(spacing: 16) {
             Text(fetchedBoard.board.name)
                 .font(.kuramubon(size: 24))
+                .foregroundStyle(Color.white)
             VStack(spacing: 8) {
                 if !fetchedBoard.entries.isEmpty {
                     let entry = fetchedBoard.entries[currentIndex]
@@ -25,14 +26,16 @@ public struct KAKeijibanView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     Spacer(minLength: 0)
                     Text(Date(timeIntervalSince1970: TimeInterval(entry.createdAt)).formatted(date: .long, time: .shortened))
+                        .foregroundStyle(Color.white)
                 } else {
                     Text("掲示はありません")
+                        .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .padding(16)
             .frame(maxHeight: .infinity)
-            .background(Color(.tertiarySystemGroupedBackground))
+            .background(Color.kaKeijibanSecondaryBackground)
             HStack(spacing: 16) {
                 Button {
                     currentIndex += 1
@@ -44,8 +47,8 @@ public struct KAKeijibanView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 }
-                .foregroundStyle(Color(.secondaryLabel))
-                .background(Color(.tertiarySystemGroupedBackground))
+                .foregroundStyle(Color.kaGray)
+                .background(Color.kaLightGray)
                 .opacity(currentIndex < fetchedBoard.entries.endIndex - 1 ? 1 : 0)
                 Button {
                     currentIndex -= 1
@@ -57,13 +60,13 @@ public struct KAKeijibanView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 }
-                .foregroundStyle(Color(.secondaryLabel))
-                .background(Color(.tertiarySystemGroupedBackground))
+                .foregroundStyle(Color.kaGray)
+                .background(Color.kaLightGray)
                 .opacity(currentIndex > 0 ? 1 : 0)
             }
         }
         .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.kaKeijibanBackground)
     }
 }
 

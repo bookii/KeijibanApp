@@ -66,6 +66,9 @@ public struct KAGalleryView: View {
             .errorAlert($error)
             .sheet(item: $pickedImage) {
                 pickedImage = nil
+                Task {
+                    await fetchWordImages()
+                }
             } content: { pickedImage in
                 KAAnalyzerView(uiImage: pickedImage.uiImage)
             }
@@ -141,6 +144,7 @@ public struct KAGalleryView: View {
                     }
                 }
             }
+            .background(Color.kaGalleryBackground)
         }
     }
 
@@ -158,13 +162,13 @@ public struct KAGalleryView: View {
                 HStack(spacing: 8) {
                     KAPhrasedWordImagesView(wordImages: selectedWordImages)
                     Text("\(selectedWordImages.count)/\(KAGalleryView.selectedWordImagesLimit)")
-                        .font(.system(size: 14))
+                        .font(.kiyosuna(size: 14))
                         .foregroundStyle(Color(.secondaryLabel))
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 8)
                 .background {
-                    Color(.systemGray6)
+                    Color(.clear)
                         .clipShape(.capsule)
                         .glassEffect()
                 }
@@ -185,7 +189,6 @@ public struct KAGalleryView: View {
                         .frame(width: 16, height: 16)
                         .padding(4)
                 }
-                .background(in: Capsule())
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
             }
@@ -245,11 +248,15 @@ public struct KAGalleryView: View {
                                             }
                                         }
                                         .rotationEffect(.degrees(180))
+                                        .padding(4)
+                                        .background(Color.white)
+                                        .shadow(radius: 1)
+                                        .border(Color.kaGalleryBorder, width: 2)
                                 }
                             }
                         }
                         .offset(x: -elapsedTime * 80)
-                        .background(Color(.systemBackground))
+                        .background(Color.kaGalleryBackground)
                     }
                     .scrollIndicators(.never)
                     .scrollEdgeEffectStyle(.none, for: .all)
