@@ -66,6 +66,9 @@ public struct KAGalleryView: View {
             .errorAlert($error)
             .sheet(item: $pickedImage) {
                 pickedImage = nil
+                Task {
+                    await fetchWordImages()
+                }
             } content: { pickedImage in
                 KAAnalyzerView(uiImage: pickedImage.uiImage)
             }
@@ -141,7 +144,7 @@ public struct KAGalleryView: View {
                     }
                 }
             }
-            .background(Color.kaSkyBlue)
+            .background(Color.kaGalleryBackground)
         }
     }
 
@@ -178,7 +181,6 @@ public struct KAGalleryView: View {
                         .frame(height: 24)
                 }
                 .buttonStyle(.glassProminent)
-                .tint(.kaGreen)
                 Button {
                     selectedWordImages = []
                 } label: {
@@ -247,11 +249,15 @@ public struct KAGalleryView: View {
                                             }
                                         }
                                         .rotationEffect(.degrees(180))
+                                        .padding(4)
+                                        .background(Color.white)
+                                        .shadow(radius: 1)
+                                        .border(Color.kaGalleryBorder, width: 2)
                                 }
                             }
                         }
                         .offset(x: -elapsedTime * 80)
-                        .background(Color.kaSkyBlue)
+                        .background(Color.kaGalleryBackground)
                     }
                     .scrollIndicators(.never)
                     .scrollEdgeEffectStyle(.none, for: .all)

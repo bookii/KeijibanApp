@@ -159,7 +159,6 @@ public struct KAEditorView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color.kaGreen)
 //            .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver || authorName.isEmpty || deleteKey.isEmpty)
             .disabled(selectedWordImages.isEmpty || isSelectedWordImagesOver)
             .frame(maxWidth: .infinity)
@@ -181,7 +180,7 @@ public struct KAEditorView: View {
         TimelineView(.animation(minimumInterval: 0.5)) { timeline in
             let isPresented = focusedTextField == nil && Int(timeline.date.timeIntervalSince1970 * 2) % 2 == 0
             Capsule()
-                .fill(Color.blue)
+                .fill(Color.accentColor)
                 .frame(width: 2, height: 24)
                 .padding(.vertical, 12)
                 .opacity(isPresented ? 1 : 0)

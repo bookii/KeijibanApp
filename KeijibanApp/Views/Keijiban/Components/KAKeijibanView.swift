@@ -35,7 +35,7 @@ public struct KAKeijibanView: View {
             }
             .padding(16)
             .frame(maxHeight: .infinity)
-            .background(Color.kaGreen)
+            .background(Color.kaKeijibanSecondaryBackground)
             HStack(spacing: 16) {
                 Button {
                     currentIndex += 1
@@ -66,7 +66,7 @@ public struct KAKeijibanView: View {
             }
         }
         .padding(16)
-        .background(Color.kaBrown)
+        .background(Color.kaKeijibanBackground)
     }
 }
 

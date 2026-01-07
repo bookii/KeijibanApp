@@ -35,15 +35,15 @@ public struct KAIndexView: View {
 
     public var body: some View {
         ZStack(alignment: .top) {
-            Color.kaLightBrown
+            Color.kaIndexForeground
                 .frame(width: 32)
                 .ignoresSafeArea()
             VStack(spacing: 16) {
-                Color.brown
+                Color.kaIndexSecondaryForeground
                     .overlay(alignment: .leading) {
                         if let boardBodyHeight {
                             ArrowHead(direction: .left)
-                                .fill(Color.brown)
+                                .fill(Color.kaIndexSecondaryForeground)
                                 .frame(width: boardBodyHeight / 4, height: boardBodyHeight)
                                 .offset(x: -boardBodyHeight / 4)
                         }
@@ -59,11 +59,11 @@ public struct KAIndexView: View {
                         .foregroundStyle(Color.white)
                     }
                     .frame(maxWidth: .infinity)
-                Color.brown
+                Color.kaIndexSecondaryForeground
                     .overlay(alignment: .trailing) {
                         if let boardBodyHeight {
                             ArrowHead(direction: .right)
-                                .fill(Color.brown)
+                                .fill(Color.kaIndexSecondaryForeground)
                                 .frame(width: boardBodyHeight / 4, height: boardBodyHeight)
                                 .offset(x: boardBodyHeight / 4)
                         }

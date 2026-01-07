@@ -87,12 +87,12 @@ public struct KAKeijibanIndexView: View {
                 fetchedBoards = []
             }
         }
-        .background(Color.kaBrown)
+        .background(Color.kaKeijibanBackground)
     }
 
     private var curtainView: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.5))
+            .fill(Color.white.opacity(0.4))
             .frame(maxHeight: .infinity)
             .ignoresSafeArea()
             .zIndex(1)
