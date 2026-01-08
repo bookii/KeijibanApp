@@ -81,15 +81,15 @@ public struct KAGalleryView: View {
             }
             .overlay(alignment: .topLeading) {
                 HStack(spacing: 4) {
+                    let font = Font.stick(size: 20)
                     PhotosPicker(selection: $pickerItem, matching: .images) {
                         Label {
                             Text("")
                         } icon: {
-                            Image(systemName: "plus")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 16, height: 16)
-                                .padding(2)
+                            Text("十")
+                                .font(font)
+                                .frame(width: 20, height: 20)
+                                .offset(y: -1)
                         }
                         .labelStyle(IconOnlyLabelStyle())
                     }
@@ -105,23 +105,20 @@ public struct KAGalleryView: View {
                             }
                         }
                     } label: {
-                        Image(systemName: "line.3.horizontal.decrease")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 18, height: 18)
-                            .offset(y: 0.5)
-                            .padding(1)
+                        Text("Y")
+                            .font(.stick(size: 20))
+                            .frame(width: 20, height: 20)
+                            .offset(y: -2)
                     }
                     .buttonStyle(.glass)
                     .clipShape(.circle)
                     Button {
                         isPhraseListViewPresented = true
                     } label: {
-                        Image(systemName: "book.pages")
-                            .resizable()
-                            .scaledToFit()
-                            .offset(x: -0.5, y: -0.5)
+                        Text("図")
+                            .font(.stick(size: 20))
                             .frame(width: 20, height: 20)
+                            .offset(y: -2)
                     }
                     .buttonStyle(.glass)
                     .clipShape(.circle)
@@ -190,10 +187,10 @@ public struct KAGalleryView: View {
                 Button {
                     selectedWordImages = []
                 } label: {
-                    Image(systemName: "xmark")
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .padding(4)
+                    Text("X")
+                        .font(.stick(size: 20))
+                        .frame(width: 20, height: 20)
+                        .offset(y: -2)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)

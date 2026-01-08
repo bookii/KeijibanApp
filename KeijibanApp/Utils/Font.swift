@@ -13,4 +13,8 @@ extension Font {
     static func kuramubon(size: CGFloat) -> Self {
         .custom("Kuramubon", size: size)
     }
+
+    static func stick(size: CGFloat) -> Self {
+        .custom("Stick-Regular", size: size)
+    }
 }

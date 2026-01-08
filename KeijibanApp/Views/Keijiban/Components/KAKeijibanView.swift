@@ -44,7 +44,10 @@ public struct KAKeijibanView: View {
                     currentIndex += 1
                 } label: {
                     HStack(spacing: 4) {
-                        Image(systemName: "arrowtriangle.backward.fill")
+                        Text("く")
+                            .font(.stick(size: 16))
+                            .frame(width: 16, height: 16)
+                            .offset(y: -1)
                         Text("過去へ")
                     }
                     .frame(maxWidth: .infinity)
@@ -59,7 +62,11 @@ public struct KAKeijibanView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Text("未来へ")
-                        Image(systemName: "arrowtriangle.forward.fill")
+                        Text("く")
+                            .font(.stick(size: 16))
+                            .frame(width: 16, height: 16)
+                            .rotationEffect(.degrees(180))
+                            .offset(y: 2)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
