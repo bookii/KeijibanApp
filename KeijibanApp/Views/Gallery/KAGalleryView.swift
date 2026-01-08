@@ -108,7 +108,7 @@ public struct KAGalleryView: View {
                         Text("Y")
                             .font(.stick(size: 20))
                             .frame(width: 20, height: 20)
-                            .offset(y: -2)
+                            .offset(y: -1)
                     }
                     .buttonStyle(.glass)
                     .clipShape(.circle)
@@ -118,7 +118,7 @@ public struct KAGalleryView: View {
                         Text("図")
                             .font(.stick(size: 20))
                             .frame(width: 20, height: 20)
-                            .offset(y: -2)
+                            .offset(y: -1)
                     }
                     .buttonStyle(.glass)
                     .clipShape(.circle)
@@ -128,9 +128,6 @@ public struct KAGalleryView: View {
             }
             .alert("フレーズを保存しました！", isPresented: $isSaveCompletionAlertPresented) {
                 Button("OK") {}
-            }
-            .task(id: selectedFilter) {
-                await fetchWordImages()
             }
             .onChange(of: pickerItem) {
                 guard let pickerItem else {
@@ -146,6 +143,19 @@ public struct KAGalleryView: View {
                         }
                     }
                 }
+            }
+            .onChange(of: selectedFilter) {
+                Task {
+                    await fetchWordImages()
+                }
+            }
+            .onAppear {
+                Task {
+                    await fetchWordImages()
+                }
+            }
+            .onDisappear {
+                filteredWordImages.removeAll()
             }
             .background(Color.kaGalleryBackground)
         }
