@@ -25,13 +25,16 @@ public struct KAIndexView: View {
         }
     }
 
+    @Binding private var selectedTabIndex: Int
     @State private var viewHeight: CGFloat?
     private var boardBodyHeight: CGFloat? { viewHeight.map { $0 / 4 } }
     private var boardBodyWidth: CGFloat? {
         viewHeight
     }
 
-    public init() {}
+    public init(selectedTabIndex: Binding<Int>) {
+        _selectedTabIndex = selectedTabIndex
+    }
 
     public var body: some View {
         ZStack(alignment: .top) {
@@ -59,6 +62,9 @@ public struct KAIndexView: View {
                         .foregroundStyle(Color.white)
                     }
                     .frame(maxWidth: .infinity)
+                    .onTapGesture {
+                        selectedTabIndex = 0
+                    }
                 Color.kaIndexSecondaryForeground
                     .overlay(alignment: .trailing) {
                         if let boardBodyHeight {
@@ -78,6 +84,9 @@ public struct KAIndexView: View {
                         .foregroundStyle(Color.white)
                     }
                     .frame(maxWidth: .infinity)
+                    .onTapGesture {
+                        selectedTabIndex = 2
+                    }
             }
             .offset(y: 16)
         }
@@ -86,11 +95,14 @@ public struct KAIndexView: View {
         .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
             viewHeight = height
         }
+        .onAppear {
+            selectedTabIndex = 1
+        }
     }
 }
 
 #if DEBUG
     #Preview {
-        KAIndexView()
+        KAIndexView(selectedTabIndex: .constant(1))
     }
 #endif

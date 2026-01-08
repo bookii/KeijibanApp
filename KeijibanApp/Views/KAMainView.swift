@@ -6,6 +6,7 @@ public struct KAMainView: View {
     @Environment(\.apiService) private var apiService
     @Environment(\.syncService) private var syncService
     @Query private var boards: [KABoard]
+    @State private var fetchedBoards: [KAFetchedBoard] = []
     @State private var selectedTabIndex: Int = 1
     @State private var error: Error?
 
@@ -17,29 +18,22 @@ public struct KAMainView: View {
                 KAGalleryView()
             }
             Tab(value: 1) {
-                KAIndexView()
+                KAIndexView(selectedTabIndex: $selectedTabIndex)
             }
             Tab(value: 2) {
-                KAKeijibanIndexView()
+                KAKeijibanIndexView(fetchedBoards: fetchedBoards)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea()
         .errorAlert($error)
+        .animation(.default, value: selectedTabIndex)
         .task {
-            if boards.isEmpty {
-                do {
-                    let fetchedBoards = try await apiService.fetchBoards(withEntries: false)
-                    try syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
-                    for board in boards {
-                        modelContext.insert(board)
-                    }
-                    if modelContext.hasChanges {
-                        try modelContext.save()
-                    }
-                } catch {
-                    self.error = KALocalizedError.wrapping(error)
-                }
+            do {
+                fetchedBoards = try await apiService.fetchBoards(withEntries: true)
+                try syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
+            } catch {
+                self.error = KALocalizedError.wrapping(error)
             }
         }
     }
