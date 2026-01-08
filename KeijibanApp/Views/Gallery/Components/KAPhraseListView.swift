@@ -39,9 +39,15 @@ public struct KAPhraseListView: View {
                         .font(.kiyosuna(size: 24, weight: .bold))
                 }
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("", systemImage: "xmark") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Text("X")
+                            .font(.stick(size: 20))
+                            .frame(width: 20, height: 20)
+                            .offset(y: -2)
                     }
+                    .buttonBorderShape(.circle)
                 }
             }
         }

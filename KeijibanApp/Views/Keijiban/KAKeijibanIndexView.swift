@@ -50,12 +50,10 @@ public struct KAKeijibanIndexView: View {
             Button {
                 isEditorSheetPresented = true
             } label: {
-                Image(systemName: "square.and.pencil")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 22, height: 22)
-                    .offset(x: 1, y: -1)
-                    .padding(1)
+                Text("十")
+                    .font(.stick(size: 20))
+                    .frame(width: 20, height: 20)
+                    .offset(y: -1)
             }
             .buttonStyle(.glass)
             .clipShape(.circle)

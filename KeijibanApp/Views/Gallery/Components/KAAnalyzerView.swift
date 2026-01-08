@@ -58,11 +58,11 @@ public struct KAAnalyzerView: View {
                         Button {
                             dismiss()
                         } label: {
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 16, height: 16)
+                            Text("X")
+                                .font(.stick(size: 20))
+                                .frame(width: 20, height: 20)
                                 .foregroundStyle(Color(.secondaryLabel))
+                                .offset(y: -1)
                         }
                     }
                 Spacer(minLength: 0)
@@ -98,7 +98,7 @@ public struct KAAnalyzerView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: previewImage.size.width * zoomRatio, height: previewImage.size.height * zoomRatio)
-                        .border(Color(.systemGray2), width: 2)
+                        .border(Color(.kaBorder), width: 2)
                         .offset(x: originInOriginalImage.x * zoomRatio, y: originInOriginalImage.y * zoomRatio)
                 }
             }

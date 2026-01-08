@@ -46,15 +46,15 @@ public struct KAEditorView: View {
             Text("\(board.name)への掲示を作成")
                 .font(.kiyosuna(size: 24, weight: .bold))
                 .frame(maxWidth: .infinity)
-                .overlay(alignment: .trailing) {
+                .overlay(alignment: .leading) {
                     Button {
                         isViewPresented = false
                     } label: {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 16, height: 16)
-                            .foregroundStyle(Color(.secondaryLabel))
+                        Text("X")
+                            .font(.stick(size: 20))
+                            .frame(width: 20, height: 20)
+                            .foregroundStyle(Color.black)
+                            .offset(y: -2)
                     }
                 }
             HStack(spacing: 16) {
@@ -178,7 +178,10 @@ public struct KAEditorView: View {
                         wordImagesCountBeforeCursor -= 1
                     }
                 } label: {
-                    Image(systemName: "arrow.left")
+                    Text("く")
+                        .font(.stick(size: 16))
+                        .frame(width: 16, height: 16)
+                        .offset(y: -1)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -188,7 +191,11 @@ public struct KAEditorView: View {
                         wordImagesCountBeforeCursor += 1
                     }
                 } label: {
-                    Image(systemName: "arrow.right")
+                    Text("く")
+                        .font(.stick(size: 16))
+                        .frame(width: 16, height: 16)
+                        .rotationEffect(.degrees(180))
+                        .offset(y: 2)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -199,8 +206,18 @@ public struct KAEditorView: View {
                         wordImagesCountBeforeCursor -= 1
                     }
                 } label: {
-                    Image(systemName: "delete.left")
-                        .frame(maxWidth: .infinity)
+                    HStack(spacing: -6) {
+                        Text("く")
+                            .font(.stick(size: 16))
+                            .offset(y: -1)
+                        Text("区")
+                            .font(.stick(size: 16))
+                            .rotationEffect(.degrees(180))
+                            .offset(y: 1)
+                    }
+                    .frame(height: 16)
+                    .offset(x: -1.5)
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
