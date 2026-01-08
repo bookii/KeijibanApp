@@ -20,7 +20,7 @@ public final class KAApiService: KAApiServiceProtocol {
             fatalError("API_BASE_URL is not set")
         }
         guard let apiBaseURL = URL(string: apiBaseURLString) else {
-            fatalError("API_BASE_URL is invalidn")
+            fatalError("API_BASE_URL is invalid")
         }
         return apiBaseURL
     }
