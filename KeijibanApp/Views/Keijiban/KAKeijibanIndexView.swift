@@ -2,47 +2,42 @@ import KeijibanCommonModule
 import SwiftUI
 
 public struct KAKeijibanIndexView: View {
-    @Environment(\.apiService) private var apiService
-    @Environment(\.syncService) private var syncService
-    @State private var fetchedBoards: [KAFetchedBoard]?
+    private let fetchedBoards: [KAFetchedBoard]
     @State private var selectedBoardId: UUID?
     @State private var viewHeight: CGFloat?
     @State private var isEditorSheetPresented: Bool = false
     @State private var error: Error?
     private var selectedBoard: KAFetchedBoard? {
-        fetchedBoards?.first(where: { $0.board.id == selectedBoardId })
+        fetchedBoards.first(where: { $0.board.id == selectedBoardId })
     }
 
-    public init() {}
+    public init(fetchedBoards: [KAFetchedBoard]) {
+        self.fetchedBoards = fetchedBoards
+    }
 
     public var body: some View {
         HStack(spacing: 0) {
-            if let fetchedBoards {
-                curtainView
-                ScrollView(.horizontal) {
-                    HStack(spacing: 0) {
-                        ForEach(fetchedBoards) { fetchedBoard in
-                            KAKeijibanView(fetchedBoard: fetchedBoard)
-                                .frame(width: viewHeight.flatMap { $0 * 1.5 })
-                                .frame(maxHeight: .infinity)
-                                .id(fetchedBoard.board.id)
-                        }
+            curtainView
+            ScrollView(.horizontal) {
+                HStack(spacing: 0) {
+                    ForEach(fetchedBoards) { fetchedBoard in
+                        KAKeijibanView(fetchedBoard: fetchedBoard)
+                            .frame(width: viewHeight.flatMap { $0 * 1.5 })
+                            .frame(maxHeight: .infinity)
+                            .id(fetchedBoard.board.id)
                     }
-                    .scrollTargetLayout()
                 }
-                .scrollPosition(id: $selectedBoardId)
-                .scrollTargetBehavior(.paging)
-                .scrollIndicators(.hidden)
-                .scrollClipDisabled()
-                .frame(width: viewHeight.flatMap { $0 * 1.5 })
-                .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
-                    viewHeight = height
-                }
-                curtainView
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .scrollTargetLayout()
             }
+            .scrollPosition(id: $selectedBoardId)
+            .scrollTargetBehavior(.paging)
+            .scrollIndicators(.hidden)
+            .scrollClipDisabled()
+            .frame(width: viewHeight.flatMap { $0 * 1.5 })
+            .onGeometryChange(for: CGFloat.self, of: \.size.height) { height in
+                viewHeight = height
+            }
+            curtainView
         }
         .ignoresSafeArea()
         .scrollEdgeEffectHidden()
@@ -71,20 +66,6 @@ public struct KAKeijibanIndexView: View {
                     }
             }
         }
-        .task {
-            do {
-                let fetchedBoards = try await apiService.fetchBoards(withEntries: true)
-                self.fetchedBoards = fetchedBoards
-                selectedBoardId = fetchedBoards.first?.board.id
-                try? syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
-            } catch let error as KALocalizedError {
-                self.error = error
-                fetchedBoards = []
-            } catch {
-                self.error = KALocalizedError.wrapping(error)
-                fetchedBoards = []
-            }
-        }
         .background(Color.kaKeijibanBackground)
     }
 
@@ -98,15 +79,11 @@ public struct KAKeijibanIndexView: View {
 }
 
 #if DEBUG
-    #Preview("通常") {
-        KAKeijibanIndexView()
-            .environment(\.apiService, KAMockApiService())
-            .environment(\.syncService, KAMockSyncService())
-    }
-
-    #Preview("取得エラー") {
-        KAKeijibanIndexView()
-            .environment(\.apiService, KAMockApiService(shouldFail: true))
-            .environment(\.syncService, KAMockSyncService())
+    #Preview {
+        @Previewable @State var mockFetchedBoards: [KAFetchedBoard] = []
+        KAKeijibanIndexView(fetchedBoards: mockFetchedBoards)
+            .task {
+                mockFetchedBoards = await KAFetchedBoard.mockFetchedBoards()
+            }
     }
 #endif
