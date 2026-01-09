@@ -21,7 +21,7 @@ public struct KAMainView: View {
                 KAIndexView(selectedTabIndex: $selectedTabIndex)
             }
             Tab(value: 2) {
-                KAKeijibanIndexView(fetchedBoards: fetchedBoards)
+                KAKeijibanIndexView(fetchedBoards: $fetchedBoards)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))

@@ -290,7 +290,8 @@ public struct KAEditorView: View {
         let predicate = #Predicate<KAPhrase> { phrase in
             phrase.boards.contains(where: { $0.id == boardId })
         }
-        let descriptor = FetchDescriptor(predicate: predicate)
+        var descriptor = FetchDescriptor(predicate: predicate)
+        descriptor.fetchLimit = 1000
         do {
             phrases = try modelContext.fetch(descriptor)
         } catch {
