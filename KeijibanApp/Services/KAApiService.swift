@@ -16,11 +16,11 @@ public protocol KAApiServiceProtocol {
 public final class KAApiService: KAApiServiceProtocol {
     public static let shared = KAApiService()
     private var apiBaseURL: URL {
-        guard let apiBaseURLString = ProcessInfo.processInfo.environment["API_BASE_URL"] else {
+        guard let apiBaseURLString = Bundle.main.infoDictionary?["API_BASE_URL"] as? String else {
             fatalError("API_BASE_URL is not set")
         }
         guard let apiBaseURL = URL(string: apiBaseURLString) else {
-            fatalError("API_BASE_URL is invalidn")
+            fatalError("API_BASE_URL is invalid")
         }
         return apiBaseURL
     }

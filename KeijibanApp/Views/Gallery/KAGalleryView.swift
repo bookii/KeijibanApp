@@ -294,9 +294,10 @@ public struct KAGalleryView: View {
             predicate = #Predicate { $0.board.id == id }
         }
         var descriptor = FetchDescriptor<KAWordImage>(predicate: predicate)
-        descriptor.fetchLimit = Self.displayedWordCount
+        descriptor.fetchLimit = Self.displayedWordCount * 10
         do {
-            filteredWordImages = try modelContext.fetch(descriptor)
+            let wordImages = try modelContext.fetch(descriptor)
+            filteredWordImages = Array(wordImages.shuffled().prefix(Self.displayedWordCount))
         } catch {
             self.error = error
             filteredWordImages = []
