@@ -2,7 +2,9 @@ import KeijibanCommonModule
 import SwiftUI
 
 public struct KAKeijibanIndexView: View {
-    private let fetchedBoards: [KAFetchedBoard]
+    @Environment(\.apiService) private var apiService
+    @Environment(\.syncService) private var syncService
+    @Binding private var fetchedBoards: [KAFetchedBoard]
     @State private var selectedBoardId: UUID?
     @State private var viewHeight: CGFloat?
     @State private var isEditorSheetPresented: Bool = false
@@ -11,8 +13,8 @@ public struct KAKeijibanIndexView: View {
         fetchedBoards.first(where: { $0.board.id == selectedBoardId })
     }
 
-    public init(fetchedBoards: [KAFetchedBoard]) {
-        self.fetchedBoards = fetchedBoards
+    public init(fetchedBoards: Binding<[KAFetchedBoard]>) {
+        _fetchedBoards = fetchedBoards
     }
 
     public var body: some View {
@@ -66,6 +68,21 @@ public struct KAKeijibanIndexView: View {
                     }
             }
         }
+        .onAppear {
+            selectedBoardId = fetchedBoards.first?.id
+        }
+        .onChange(of: isEditorSheetPresented) { oldValue, newValue in
+            if oldValue, !newValue {
+                Task {
+                    do {
+                        fetchedBoards = try await apiService.fetchBoards(withEntries: true)
+                        try syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
+                    } catch {
+                        self.error = KALocalizedError.wrapping(error)
+                    }
+                }
+            }
+        }
         .background(Color.kaKeijibanBackground)
     }
 
@@ -81,7 +98,7 @@ public struct KAKeijibanIndexView: View {
 #if DEBUG
     #Preview {
         @Previewable @State var mockFetchedBoards: [KAFetchedBoard] = []
-        KAKeijibanIndexView(fetchedBoards: mockFetchedBoards)
+        KAKeijibanIndexView(fetchedBoards: $mockFetchedBoards)
             .task {
                 mockFetchedBoards = await KAFetchedBoard.mockFetchedBoards()
             }
