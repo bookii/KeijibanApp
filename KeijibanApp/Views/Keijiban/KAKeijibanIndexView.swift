@@ -71,6 +71,11 @@ public struct KAKeijibanIndexView: View {
         .onAppear {
             selectedBoardId = fetchedBoards.first?.id
         }
+        .onChange(of: selectedBoardId) { _, newValue in
+            guard let newValue else {
+                return
+            }
+        }
         .onChange(of: isEditorSheetPresented) { oldValue, newValue in
             if oldValue, !newValue {
                 Task {

@@ -10,6 +10,7 @@ public extension EnvironmentValues {
 @MainActor
 public protocol KAApiServiceProtocol {
     func fetchBoards(withEntries: Bool) async throws -> [KAFetchedBoard]
+    func fetchEntries(boardId: UUID, previousOldestCreatedAt: Int?, count: Int?) async throws -> [KAEntry]
     func postEntry(boardId: UUID, wordImages: [KAWordImage], authorName: String, deleteKey: String) async throws
 }
 
@@ -33,6 +34,16 @@ public final class KAApiService: KAApiServiceProtocol {
             .serializingDecodable([KCMBoardDTO].self)
             .value
             .map { try KAFetchedBoard(from: $0) }
+    }
+
+    public func fetchEntries(boardId: UUID, previousOldestCreatedAt: Int?, count: Int?) async throws -> [KAEntry] {
+        let url = apiBaseURL.appendingPathComponent("/boards/\(boardId)/entries")
+        let query = KCMGetEntriesRequestQuery(offsetCreatedAt: previousOldestCreatedAt.map { $0 - 1 },
+                                              count: count)
+        return try await AF.request(url.absoluteString, parameters: query)
+            .serializingDecodable([KCMEntryDTO].self)
+            .value
+            .map { try KAEntry(from: $0) }
     }
 
     public func postEntry(boardId: UUID, wordImages: [KAWordImage], authorName: String, deleteKey: String) async throws {
@@ -73,6 +84,10 @@ public final class KAApiService: KAApiServiceProtocol {
                 throw KALocalizedError.withMessage("Mock Failure")
             }
             return await KAFetchedBoard.mockFetchedBoards()
+        }
+
+        public func fetchEntries(boardId _: UUID, previousOldestCreatedAt _: Int?, count _: Int?) async throws -> [KAEntry] {
+            await [KAEntry.mockEntry()]
         }
 
         public func postEntry(boardId _: UUID, wordImages _: [KAWordImage], authorName _: String, deleteKey _: String) async throws {}
