@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bookii/KeijibanCommonModule.git",
       "state" : {
-        "revision" : "169f89d82f6516b93dca116c301bf4ee3963963d",
-        "version" : "0.1.22"
+        "revision" : "8301d1375a27b5e1865eb3019bb198d9fc4be2c0",
+        "version" : "0.2.1"
       }
     }
   ],

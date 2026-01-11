@@ -8,7 +8,7 @@ public extension EnvironmentValues {
 
 @MainActor
 public protocol KASyncServiceProtocol {
-    func syncBoards(fetchedBoards: [KABoard]) throws
+    func syncBoards(_ boards: [KABoard]) throws
 }
 
 public final class KASyncService: KASyncServiceProtocol {
@@ -16,7 +16,7 @@ public final class KASyncService: KASyncServiceProtocol {
 
     private init() {}
 
-    public func syncBoards(fetchedBoards: [KABoard]) throws {
+    public func syncBoards(_ fetchedBoards: [KABoard]) throws {
         let context = ModelContext(ModelContainer.shared)
         let storedBoards: [KABoard]
 
@@ -49,44 +49,10 @@ public final class KASyncService: KASyncServiceProtocol {
 
 #if DEBUG
     public final class KAMockSyncService: KASyncServiceProtocol {
-        private let modelContainer: ModelContainer?
+        public static let shared = KAMockSyncService()
 
-        public init(modelContainer: ModelContainer? = nil) {
-            self.modelContainer = modelContainer
-        }
+        private init() {}
 
-        public func syncBoards(fetchedBoards: [KABoard]) throws {
-            guard let modelContainer else {
-                return
-            }
-
-            let context = ModelContext(modelContainer)
-            let storedBoards: [KABoard]
-
-            do {
-                storedBoards = try context.fetch(FetchDescriptor<KABoard>())
-            } catch {
-                throw KALocalizedError.withMessage("Failed to get stored board")
-            }
-
-            for fetchedBoard in fetchedBoards {
-                if let storedBoard = storedBoards.first(where: { $0.id == fetchedBoard.id }) {
-                    storedBoard.update(with: fetchedBoard)
-                } else {
-                    context.insert(fetchedBoard)
-                }
-            }
-
-            let fetchedBoardIds = Set(fetchedBoards.map(\.id))
-            for storedBoard in storedBoards {
-                if !fetchedBoardIds.contains(storedBoard.id) {
-                    storedBoard.delete()
-                }
-            }
-
-            if context.hasChanges {
-                try context.save()
-            }
-        }
+        public func syncBoards(_: [KABoard]) throws {}
     }
 #endif

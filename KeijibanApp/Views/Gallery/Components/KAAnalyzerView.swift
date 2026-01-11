@@ -196,7 +196,7 @@ public struct KAAnalyzerView: View {
                 }
                 .environment(\.analyzerService, KAMockAnalyzerService(shouldFail: shouldFail))
                 .environment(\.apiService, KAMockApiService())
-                .environment(\.syncService, KAMockSyncService(modelContainer: modelContainer))
+                .environment(\.syncService, KAMockSyncService.shared)
                 .modelContainer(modelContainer)
                 .task {
                     isSheetPresented = true
