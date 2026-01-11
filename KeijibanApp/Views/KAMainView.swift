@@ -5,8 +5,7 @@ public struct KAMainView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.apiService) private var apiService
     @Environment(\.syncService) private var syncService
-    @Query private var boards: [KABoard]
-    @State private var fetchedBoards: [KAFetchedBoard] = []
+    @State private var boards: [KABoard] = []
     @State private var selectedTabIndex: Int = 1
     @State private var error: Error?
 
@@ -21,7 +20,7 @@ public struct KAMainView: View {
                 KAIndexView(selectedTabIndex: $selectedTabIndex)
             }
             Tab(value: 2) {
-                KAKeijibanIndexView(fetchedBoards: $fetchedBoards)
+                KAKeijibanIndexView(boards: $boards)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
@@ -30,8 +29,8 @@ public struct KAMainView: View {
         .animation(.default, value: selectedTabIndex)
         .task {
             do {
-                fetchedBoards = try await apiService.fetchBoards(withEntries: true)
-                try syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
+                boards = try await apiService.fetchBoards()
+                try syncService.syncBoards(boards)
             } catch {
                 self.error = KALocalizedError.wrapping(error)
             }
@@ -43,6 +42,6 @@ public struct KAMainView: View {
     #Preview {
         KAMainView()
             .environment(\.apiService, KAMockApiService())
-            .environment(\.syncService, KAMockSyncService())
+            .environment(\.syncService, KAMockSyncService.shared)
     }
 #endif

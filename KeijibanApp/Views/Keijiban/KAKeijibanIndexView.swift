@@ -4,17 +4,17 @@ import SwiftUI
 public struct KAKeijibanIndexView: View {
     @Environment(\.apiService) private var apiService
     @Environment(\.syncService) private var syncService
-    @Binding private var fetchedBoards: [KAFetchedBoard]
+    @Binding private var boards: [KABoard]
     @State private var selectedBoardId: UUID?
     @State private var viewHeight: CGFloat?
     @State private var isEditorSheetPresented: Bool = false
     @State private var error: Error?
-    private var selectedBoard: KAFetchedBoard? {
-        fetchedBoards.first(where: { $0.board.id == selectedBoardId })
+    private var selectedBoard: KABoard? {
+        boards.first(where: { $0.id == selectedBoardId })
     }
 
-    public init(fetchedBoards: Binding<[KAFetchedBoard]>) {
-        _fetchedBoards = fetchedBoards
+    public init(boards: Binding<[KABoard]>) {
+        _boards = boards
     }
 
     public var body: some View {
@@ -22,11 +22,11 @@ public struct KAKeijibanIndexView: View {
             curtainView
             ScrollView(.horizontal) {
                 HStack(spacing: 0) {
-                    ForEach(fetchedBoards) { fetchedBoard in
-                        KAKeijibanView(fetchedBoard: fetchedBoard)
+                    ForEach(boards) { board in
+                        KAKeijibanView(board: board)
                             .frame(width: viewHeight.flatMap { $0 * 1.5 })
                             .frame(maxHeight: .infinity)
-                            .id(fetchedBoard.board.id)
+                            .id(board.id)
                     }
                 }
                 .scrollTargetLayout()
@@ -60,7 +60,7 @@ public struct KAKeijibanIndexView: View {
         .errorAlert($error)
         .fullScreenCover(isPresented: $isEditorSheetPresented) {
             if let selectedBoard {
-                KAEditorView(board: selectedBoard.board, isPresented: $isEditorSheetPresented)
+                KAEditorView(board: selectedBoard, isPresented: $isEditorSheetPresented)
             } else {
                 Color.clear
                     .onAppear {
@@ -69,19 +69,14 @@ public struct KAKeijibanIndexView: View {
             }
         }
         .onAppear {
-            selectedBoardId = fetchedBoards.first?.id
-        }
-        .onChange(of: selectedBoardId) { _, newValue in
-            guard let newValue else {
-                return
-            }
+            selectedBoardId = boards.first?.id
         }
         .onChange(of: isEditorSheetPresented) { oldValue, newValue in
             if oldValue, !newValue {
                 Task {
                     do {
-                        fetchedBoards = try await apiService.fetchBoards(withEntries: true)
-                        try syncService.syncBoards(fetchedBoards: fetchedBoards.map(\.board))
+                        boards = try await apiService.fetchBoards()
+                        try syncService.syncBoards(boards)
                     } catch {
                         self.error = KALocalizedError.wrapping(error)
                     }
@@ -102,10 +97,10 @@ public struct KAKeijibanIndexView: View {
 
 #if DEBUG
     #Preview {
-        @Previewable @State var mockFetchedBoards: [KAFetchedBoard] = []
-        KAKeijibanIndexView(fetchedBoards: $mockFetchedBoards)
+        @Previewable @State var mockBoards: [KABoard] = []
+        KAKeijibanIndexView(boards: $mockBoards)
             .task {
-                mockFetchedBoards = await KAFetchedBoard.mockFetchedBoards()
+                mockBoards = await KABoard.mockBoards()
             }
     }
 #endif
